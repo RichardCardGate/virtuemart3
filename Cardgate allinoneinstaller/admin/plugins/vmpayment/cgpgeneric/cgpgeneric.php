@@ -58,16 +58,6 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
         $this->_tablepkey = 'id'; //virtuemart_cardgate_id';
         $this->_tableId = 'id'; //'virtuemart_cardgate_id';
 
-        if ( !empty( $_SERVER['CGP_GATEWAY_URL'] ) ) {
-            $this->_url = $_SERVER['CGP_GATEWAY_URL'];
-        } else {
-            if ( $this->is_test_url() ) {
-                $this->_url = 'https://secure-staging.curopayments.net/gateway/cardgate/';
-            } else {
-                $this->_url = 'https://secure.curopayments.net/gateway/cardgate/';
-            }
-        }
-
         $varsToPush = array(
             'test_mode' => array( '', 'char' ),
             'site_id' => array( 0, 'int' ),
@@ -164,6 +154,16 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
      */
     public function plgVmConfirmedOrder( $cart, $order ) {
 
+        if ( !($method = $this->getVmPluginMethod( $order['details']['BT']->virtuemart_paymentmethod_id )) ) {
+            return null;
+        }
+
+        if ( !$this->selectedThisElement( $method->payment_element ) ) {
+            return false;
+        }
+
+        $this->set_url( $method->test_mode == 'test' );
+
         $cartitems = array();
         $products = $cart->products;
 
@@ -216,14 +216,6 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
             $item['vat_inc'] = 1;
             $item['type'] = 4;
             $cartitems[] = $item;
-        }
-
-        if ( !($method = $this->getVmPluginMethod( $order['details']['BT']->virtuemart_paymentmethod_id )) ) {
-            return null;
-        }
-
-        if ( !$this->selectedThisElement( $method->payment_element ) ) {
-            return false;
         }
 
         $session = JFactory::getSession();
@@ -300,7 +292,7 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
             "plugin_name" => $this->_plugin_name,
             "plugin_version" => $this->_plugin_version,
             "extra" => $order['details']['BT']->order_number,
-            "cartitems" => json_encode( $cartitems ),
+            "cartitems" => json_encode( $cartitems, JSON_HEX_APOS | JSON_HEX_QUOT ),
         );
 
         switch ( substr( $this->_plugin_name, 3 ) ) {
@@ -329,10 +321,6 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
                 $post_variables['option'] = 'paypal';
                 break;
 
-            case 'webmoney':
-                $post_variables['option'] = 'webmoney';
-                break;
-
             case 'banktransfer':
                 $post_variables['option'] = 'banktransfer';
                 break;
@@ -340,7 +328,7 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
             case 'giropay':
                 $post_variables['option'] = 'giropay';
                 break;
-
+            
             case 'directdebit':
                 $post_variables['option'] = 'directdebit';
                 break;
@@ -391,12 +379,12 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
         }
         // Add for iDEAL bank options
         if ( substr( $this->_plugin_name, 3 ) == "ideal" ) {
-            $banks = $this->getBankOptions();
+            $banks = $this->getBankOptions($method->test_mode == 'test');
+            
             if ( $banks ) {
                 $html .= '<label for="cgp_ideal_issuer">' . JText::_( 'VMPAYMENT_' . strtoupper( $this->_plugin_name ) . '_IDEAL_SELECT_BANK_LABEL' ) . '</label>';
                 $html .= '<select id="cgp_ideal_issuer" name="suboption" onchange="selectBank()">';
                 $banks[0] = JText::_( 'VMPAYMENT_' . strtoupper( $this->_plugin_name ) . '_IDEAL_SELECT_BANK_DEFAULT' );
-                $banks[1] = JText::_( 'VMPAYMENT_' . strtoupper( $this->_plugin_name ) . '_IDEAL_ADDITIONAL_BANK' );
                 $html .= $this->makeBankOptions( $banks );
                 $html .= '</select>';
             } else {
@@ -987,8 +975,18 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
         return $this->setOnTablePluginParams( $name, $id, $table );
     }
 
-    private function getBankOptions() {
-        $url = 'https://gateway.cardgateplus.com/cache/idealDirectoryRabobank.dat';
+    private function getBankOptions($is_test) {
+        
+        if ( !empty( $_SERVER['CGP_GATEWAY_URL'] ) ) {
+            $base = substr($_SERVER['CGP_GATEWAY_URL'], 0,strpos($_SERVER['CGP_GATEWAY_URL'],'gateway'));
+            $url = $base.'cache/idealDirectoryCUROPayments.dat';
+        } else {
+            if ( $is_test ) {
+                $url = 'https://secure-staging.curopayments.net/cache/idealDirectoryCUROPayments.dat';
+            } else {
+                $url = 'https://secure.curopayments.net/cache/idealDirectoryCUROPayments.dat';
+            }
+        }
 
         if ( !ini_get( 'allow_url_fopen' ) || !function_exists( 'file_get_contents' ) ) {
             $result = false;
@@ -997,7 +995,6 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
         }
         if ( $result ) {
             $aBanks = unserialize( $result );
-            $aBanks[0] = '-Maak uw keuze a.u.b.-';
             return $aBanks;
         }
         return $result;
@@ -1011,15 +1008,16 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
         return $html;
     }
 
-    private function is_test_url() {
-        $url = (isset( $_SERVER['HTTPS'] ) && $_SERVER['HTTPS'] != 'off' ? 'https' : 'http');
-        $url .= '://';
-        $url.= $_SERVER['SERVER_NAME'];
-
-        if ( strpos( $url, 'dbcorp.nl' ) > 0 ) {
-            return true;
+    private function set_url( $test ) {
+        if ( !empty( $_SERVER['CGP_GATEWAY_URL'] ) ) {
+            $this->_url = $_SERVER['CGP_GATEWAY_URL'];
+        } else {
+            if ( $test ) {
+                $this->_url = 'https://secure-staging.curopayments.net/gateway/cardgate/';
+            } else {
+                $this->_url = 'https://secure.curopayments.net/gateway/cardgate/';
+            }
         }
-        return false;
     }
 
 }

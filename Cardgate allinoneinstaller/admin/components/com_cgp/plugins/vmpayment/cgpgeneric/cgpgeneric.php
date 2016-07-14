@@ -329,10 +329,6 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
                 $post_variables['option'] = 'paypal';
                 break;
 
-            case 'webmoney':
-                $post_variables['option'] = 'webmoney';
-                break;
-
             case 'banktransfer':
                 $post_variables['option'] = 'banktransfer';
                 break;
