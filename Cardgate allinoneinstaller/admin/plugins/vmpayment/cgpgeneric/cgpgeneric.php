@@ -328,7 +328,7 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
             case 'giropay':
                 $post_variables['option'] = 'giropay';
                 break;
-            
+
             case 'directdebit':
                 $post_variables['option'] = 'directdebit';
                 break;
@@ -379,8 +379,8 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
         }
         // Add for iDEAL bank options
         if ( substr( $this->_plugin_name, 3 ) == "ideal" ) {
-            $banks = $this->getBankOptions($method->test_mode == 'test');
-            
+            $banks = $this->getBankOptions( $method->test_mode == 'test' );
+
             if ( $banks ) {
                 $html .= '<label for="cgp_ideal_issuer">' . JText::_( 'VMPAYMENT_' . strtoupper( $this->_plugin_name ) . '_IDEAL_SELECT_BANK_LABEL' ) . '</label>';
                 $html .= '<select id="cgp_ideal_issuer" name="suboption" onchange="selectBank()">';
@@ -975,18 +975,14 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
         return $this->setOnTablePluginParams( $name, $id, $table );
     }
 
-    private function getBankOptions($is_test) {
-        
-        if ( !empty( $_SERVER['CGP_GATEWAY_URL'] ) ) {
-            $base = substr($_SERVER['CGP_GATEWAY_URL'], 0,strpos($_SERVER['CGP_GATEWAY_URL'],'gateway'));
-            $url = $base.'cache/idealDirectoryCUROPayments.dat';
+    private function getBankOptions( $is_test ) {
+
+        if ( $is_test ) {
+            $url = 'https://secure-staging.curopayments.net/cache/idealDirectoryCUROPayments.dat';
         } else {
-            if ( $is_test ) {
-                $url = 'https://secure-staging.curopayments.net/cache/idealDirectoryCUROPayments.dat';
-            } else {
-                $url = 'https://secure.curopayments.net/cache/idealDirectoryCUROPayments.dat';
-            }
+            $url = 'https://secure.curopayments.net/cache/idealDirectoryCUROPayments.dat';
         }
+
 
         if ( !ini_get( 'allow_url_fopen' ) || !function_exists( 'file_get_contents' ) ) {
             $result = false;
@@ -1009,14 +1005,10 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
     }
 
     private function set_url( $test ) {
-        if ( !empty( $_SERVER['CGP_GATEWAY_URL'] ) ) {
-            $this->_url = $_SERVER['CGP_GATEWAY_URL'];
+        if ( $test ) {
+            $this->_url = 'https://secure-staging.curopayments.net/gateway/cardgate/';
         } else {
-            if ( $test ) {
-                $this->_url = 'https://secure-staging.curopayments.net/gateway/cardgate/';
-            } else {
-                $this->_url = 'https://secure.curopayments.net/gateway/cardgate/';
-            }
+            $this->_url = 'https://secure.curopayments.net/gateway/cardgate/';
         }
     }
 
