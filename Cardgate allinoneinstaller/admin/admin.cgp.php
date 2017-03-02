@@ -23,4 +23,4 @@
 
 defined('_JEXEC') or die();
 
-echo 'The only purpose of this component, is to install the Card Gate Plus payment modules. You may uninstall it if you wish, the Card Gate Plus payment modules will remain installed.';
+//echo 'The only purpose of this component, is to install the Card Gate Plus payment modules. You may uninstall it if you wish, the Card Gate Plus payment modules will remain installed.';

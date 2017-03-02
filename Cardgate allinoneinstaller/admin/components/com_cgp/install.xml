@@ -6,7 +6,7 @@
     <license>http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL</license>
    <author>Richard Schoots</author>
     <authorUrl>http://cardgate.com</authorUrl>
-    <version>3.0.5</version>
+    <version>3.0.6</version>
      
    	<scriptfile>script.cgp.php</scriptfile>
 	<installfile>script.cgp.php</installfile>

@@ -116,7 +116,6 @@ if (!defined ('_CGP_SCRIPT_INCLUDED')) {
 				echo " Card Gate language moved to the joomla language BE folder<br/ >";
 			
 				echo "<H3>Installing CardGate Plugins and components Success.</h3>";
-				echo "<H3>You may directly uninstall this component. Your plugins will remain</h3>";
 			} else {
 				echo "<H3>Updated CardGatePlus Plugin tables</h3>";
 			}

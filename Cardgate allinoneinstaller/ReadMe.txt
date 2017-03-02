@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------
 // Card Gate payment module for Joomla virtuemart 3.0+
-// Version: 3.0.5
+// Version: 3.0.6
 // Author: Richard Schoots, Card Gate Plus B.V.
 // Email: support@cardgate.com
 // Web: http://www.cardgate.com
@@ -12,6 +12,7 @@ There is no warranty what so ever. You accept this by using this software.
 
 Changelog
 =========
+3.0.6 - Removed installer notice
 3.0.5 - New payment methods: Afterpay, Klarna, Bitcoin
 3.0.4 - Fixed class redeclaration error in the callback process.
 3.0.3 - Now also compatible with Joomla 3.x
@@ -45,7 +46,7 @@ Installation
 12. Repeat steps 4 to 11 for each Card Gate paymentmethod you wish to use 
 13. In your Card Gate Merchant back-office, under Sites, select the appropriate site.
 14. Set the Control Url, eg. http://yoursite.com/index.php?option=com_cgp&task=callback
-   - (Substitute http://yoursite.com in the above url for the url of your website) 
+   - (Substitute http://yoursite.com in the above url for the url of your website)
 15. Return URL and Return URL failed  need not be filled in for this module.
   
 When you are done testing, be sure to switch each payment method from "Test Mode" to "Live Mode".
