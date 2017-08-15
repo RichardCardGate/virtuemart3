@@ -55,12 +55,12 @@ if (!defined ('_CGP_SCRIPT_INCLUDED')) {
 		}
 
 		public function discover_install () {
-			//$this->cgpInstall();
+			$this->cgpInstall();
 		}
 
 		public function postflight () {
 
-			//$this->cgpInstall();
+			$this->cgpInstall();
 		}
 
 		public function cgpInstall () {
