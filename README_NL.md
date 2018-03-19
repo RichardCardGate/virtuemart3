@@ -18,7 +18,7 @@ of neem contact op met je accountmanager.
 
 ## Installatie
 
-1. Download het [Mijn CardGate](https://my.cardgate.com/) bestand.
+1. Download het Cardgate **allinoneinstaller.zip** bestand.
 
 2. Ga naar het **admin** gedeelte van je webshop en selecteer **Extensiebeheer** uit het **Extensies** menu.
 
@@ -50,7 +50,7 @@ of neem contact op met je accountmanager.
 
 10. Herhaal de **stappen 3 tot en met 9** voor iedere **betaalmethode** die je wenst te activeren.
 
-11. Ga naar [My Cardgate](https://my.cardgate.com/), kies **Sites** en selecteer de juiste site.
+11. Ga naar [Mijn CardGate](https://my.cardgate.com/), kies **Sites** en selecteer de juiste site.
 
 12. Vul bij **Technische Koppeling** de **Callback URL** in, bijvoorbeeld:  
     **http://mijnwebshop.com/index.php?option=com_cgp&task=callback**  
