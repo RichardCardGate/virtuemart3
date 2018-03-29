@@ -8,7 +8,7 @@
 
 ## Support
 
-This plug-in supports VirtueMart version **3.0.0 - 3.0.18** with the Joomla versions **2.5, 2.6 and 3.x**
+This Extension supports VirtueMart version **3.0.0 - 3.0.18** with the Joomla versions **2.5, 2.6 and 3.x**
 
 ## Preparation
 
@@ -53,7 +53,7 @@ Please visit [My Cardgate](https://my.cardgate.com/) and retrieve your Site ID a
 
 12. Go to **Connection to the website** and enter the **Callback URL**, for example:
     **http://mywebshop.com/index.php?option=com_cgp&task=callback**
-(Replace **http://mywebshop.com** with the URL of your webshop)
+    (Replace **http://mywebshop.com** with the URL of your webshop)
 
 13. When you are **finished testing** make sure that you switch **all activated payment methods** from **Test Mode** to **Live mode** and save it (**Save**). 
  
