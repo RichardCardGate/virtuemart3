@@ -4,25 +4,26 @@
 
 ## Support
 
-Deze Extensie is geschikt voor VirtueMart versie **3.0.0 - 3.0.18** met Joomla versie **2.5, 2.6 and 3.x**
+Deze extensie is geschikt voor VirtueMart versie **3.0.0 - 3.0.18** met Joomla versie **2.5, 2.6 and 3.x** .
 
 ## Voorbereiding
 
 Voor het gebruik van deze module zijn CardGate gegevens nodig.  
-Bezoek hiervoor [Mijn CardGate](https://my.cardgate.com/) en haal je Site ID and Hash Key op,  
+Bezoek hiervoor [Mijn CardGate](https://my.cardgate.com/) en haal je gegevens op,  
 of neem contact op met je accountmanager.  
 
 ## Installatie
 
-1. Download het Cardgate **allinoneinstaller.zip** bestand.
+1. Download en unzip de meest recente [source code](https://github.com/cardgate/virtuemart3/releases/) op je bureaublad.
 
-2. Ga naar het **admin** gedeelte van je webshop en selecteer **Extensiebeheer** uit het **Extensies** menu.
+2. Maak van de **Cardgate allinoneinstaller** map een zip bestand.
 
-3. Bij de optie **Upload pakketbestand** klik op de knop **Bladeren...**   
+3. Ga naar het **admin** gedeelte van je webshop en selecteer **Extensiebeheer** uit het **Extensies** menu.
+
+4. Bij de optie **Upload pakketbestand** klik op de knop **Bladeren...**   
    Selecteer het **CardGate allinoneinstaller.zip** bestand.
    
-4. Klik op de knop **Uploaden & Installeren**.  
-   (Het is ook mogelijk om de plug-in te unzippen en via **FTP** te uploaden en dan te installeren.)
+5. Klik op de knop **Uploaden & Installeren**.  
   
 ## Configuratie
 
@@ -40,7 +41,7 @@ of neem contact op met je accountmanager.
 
 7. Kies nu het **Configuration** tabblad.
 
-8. Vul de **Site ID** en de **Hash Key (Codeersleutel)** in, deze kun je vinden bij **Sites** op [Mijn CardGate](https://my.cardgate.com/).
+8. Vul de **site ID** en de **hash key** in, deze kun je vinden bij **Sites** op [Mijn CardGate](https://my.cardgate.com/).
 
 9. Vul de andere relevante configuratie informatie in en klik op **Opslaan** en **Sluiten**.
 
