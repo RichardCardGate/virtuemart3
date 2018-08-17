@@ -73,7 +73,7 @@ $zip->close();
 
     $data = array();
 
-    $src = '../administrator/components/com_cgp/';
+    $src = '../components/com_cgp/';
     $dst = 'Cardgate allinoneinstaller/admin/components/com_cgp/';
     $is_dir = true;
     array_push( $data, data_element( $src, $dst, $is_dir ) );
@@ -127,6 +127,10 @@ $zip->close();
     $dst = 'Cardgate allinoneinstaller/admin/plugins/vmpayment/cgppaypal/';
     $is_dir = true;
     array_push( $data, data_element( $src, $dst, $is_dir ) );
+    $src = '../plugins/vmpayment/cgppaysafecard';
+    $dst = 'Cardgate allinoneinstaller/admin/plugins/vmpayment/cgppaysafecard/';
+    $is_dir = true;
+    array_push( $data, data_element( $src, $dst, $is_dir ) );
     $src = '../plugins/vmpayment/cgpprzelewy24';
     $dst = 'Cardgate allinoneinstaller/admin/plugins/vmpayment/cgpprzelewy24/';
     $is_dir = true;
@@ -146,7 +150,7 @@ $zip->close();
 // make the zip
     echo 'files copied<br>';
 // Get real path for our folder
-    $rootPath = '/home/richard/websites/joomlavm3/htdocs/_plugin/Cardgate allinoneinstaller';
+    $rootPath = '/var/www/joomlavm3/htdocs/_plugin/Cardgate allinoneinstaller';
     $filename = 'Cardgate allinoneinstaller.zip';
 
     zipfiles( $filename, $rootPath );

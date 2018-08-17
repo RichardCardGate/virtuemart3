@@ -40,7 +40,7 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin
      *
      * @var mixed
      */
-    protected $_plugin_version = "3.0.8";
+    protected $_plugin_version = "3.0.9";
 
     protected $_url = '';
 
@@ -377,6 +377,10 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin
             
             case 'paypal':
                 $post_variables['option'] = 'paypal';
+                break;
+                
+            case 'paysafecard':
+                $post_variables['option'] = 'paysafecard';
                 break;
             
             case 'banktransfer':
