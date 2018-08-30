@@ -18,7 +18,7 @@ Please visit [My CardGate](https://my.cardgate.com/) and retrieve your Site ID a
 
 3. Go to the **admin** section of your webshop and select **Extension manager** from the **Extensions** menu.
 
-4. At the option **Upload Package File** click on the **Browse...** button.
+4. At the option **Upload Package File** click on the **Browse...** button.  
    Select the **CardGate allinoneinstaller.zip** file.
    
 5. Click on the **Upload File & Install** button.
