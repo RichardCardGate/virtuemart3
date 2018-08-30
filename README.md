@@ -9,10 +9,10 @@ This Extension supports VirtueMart version **3.0.0 - 3.0.18** with the Joomla ve
 ## Preparation
 
 The usage of this module requires that you have obtained CardGate credentials.
-Please visit [My CardGate](https://my.cardgate.com/) and retrieve your Site ID and Hash key, or contact your accountmanager.
+Please visit [**My CardGate**](https://my.cardgate.com/) and retrieve your Site ID and Hash key, or contact your accountmanager.
 
 ## Installation
-1. Download and unzip the most recent [source code](https://github.com/cardgate/virtuemart3/releases) file on your desktop.
+1. Download and unzip the most recent [**source code**](https://github.com/cardgate/virtuemart3/releases) file on your desktop.
 
 2. Make a zip file of the **Cardgate allinoneinstaller** folder.
 
@@ -39,13 +39,13 @@ Please visit [My CardGate](https://my.cardgate.com/) and retrieve your Site ID a
 
 7. Now select the **Configuration** tabpage.
 
-8. Enter the **site ID** and the **hash key**, which you can find at **Sites** on [My CardGate](https://my.cardgate.com/).
+8. Enter the **site ID** and the **hash key**, which you can find at **Sites** on [**My CardGate**](https://my.cardgate.com/).
 
 9. Enter the other relevant configuration information and click on **Save** and **Close**.
 
 10. Repeat **steps 3 to 9** for each **payment method** you wish to activate.
 
-11. Go to [My CardGate](https://my.cardgate.com/), choose **Sites** and select the appropriate site.
+11. Go to [**My CardGate**](https://my.cardgate.com/), choose **Sites** and select the appropriate site.
 
 12. Go to **Connection to the website** and enter the **Callback URL**, for example:
     **http://mywebshop.com/index.php?option=com_cgp&task=callback**
