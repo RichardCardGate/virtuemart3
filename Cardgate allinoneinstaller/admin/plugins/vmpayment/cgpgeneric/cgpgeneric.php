@@ -406,6 +406,9 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin
             case 'bitcoin':
                 $post_variables['option'] = 'bitcoin';
                 break;
+            case 'billink':
+                $post_variables['option'] = 'billink';
+                break;
         }
         
         if ($method->test_mode == 'test') {
