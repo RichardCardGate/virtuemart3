@@ -40,7 +40,7 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin
      *
      * @var mixed
      */
-    protected $_plugin_version = "3.0.9";
+    protected $_plugin_version = "3.0.10";
 
     protected $_url = '';
 
@@ -362,19 +362,23 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin
             case 'creditcard':
                 $post_variables['option'] = 'creditcard';
                 break;
-            
+                
             case 'sofortbanking':
                 $post_variables['option'] = 'directebanking';
                 break;
-            
+                
             case 'ideal':
                 $post_variables['option'] = 'ideal';
                 break;
-            
+                
+            case 'idealqr':
+                $post_variables['option'] = 'idealqr';
+                break;
+                
             case 'mistercash':
                 $post_variables['option'] = 'mistercash';
                 break;
-            
+                
             case 'paypal':
                 $post_variables['option'] = 'paypal';
                 break;
@@ -382,30 +386,43 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin
             case 'paysafecard':
                 $post_variables['option'] = 'paysafecard';
                 break;
-            
+                
+            case 'paysafecash':
+                $post_variables['option'] = 'paysafecash';
+                break;
+                
             case 'banktransfer':
                 $post_variables['option'] = 'banktransfer';
                 break;
-            
+                
             case 'giropay':
                 $post_variables['option'] = 'giropay';
                 break;
-            
+                
+            case 'giftcard':
+                $post_variables['option'] = 'giftcard';
+                break;
+                
             case 'directdebit':
                 $post_variables['option'] = 'directdebit';
                 break;
+                
             case 'przelewy24':
                 $post_variables['option'] = 'przelewy24';
                 break;
+                
             case 'afterpay':
                 $post_variables['option'] = 'afterpay';
                 break;
+                
             case 'klarna':
                 $post_variables['option'] = 'klarna';
                 break;
+                
             case 'bitcoin':
                 $post_variables['option'] = 'bitcoin';
                 break;
+                
             case 'billink':
                 $post_variables['option'] = 'billink';
                 break;
