@@ -87,18 +87,22 @@ if (!defined ('_CGP_SCRIPT_INCLUDED')) {
 			
 			$this->installPlugin ('CardGatePlus Credit Card', 'plugin', 'cgpcreditcard', 'vmpayment');
 			$this->installPlugin ('CardGatePlus iDEAL', 'plugin', 'cgpideal', 'vmpayment');
+			$this->installPlugin ('CardGatePlus iDEAL QR', 'plugin', 'cgpidealqr', 'vmpayment');
 			$this->installPlugin ('CardGatePlus Mister Cash', 'plugin', 'cgpmistercash', 'vmpayment');
 			$this->installPlugin ('CardGatePlus PayPal', 'plugin', 'cgppaypal', 'vmpayment');
 			$this->installPlugin ('CardGatePlus Paysafecard', 'plugin', 'cgppaysafecard', 'vmpayment');
+			$this->installPlugin ('CardGatePlus Paysafecash', 'plugin', 'cgppaysafecash', 'vmpayment');
 			$this->installPlugin ('CardGatePlus SofortBanking', 'plugin', 'cgpsofortbanking', 'vmpayment');
 			
 			$this->installPlugin ('CardGatePlus Banktransfer', 'plugin', 'cgpbanktransfer', 'vmpayment');
+			$this->installPlugin ('CardGatePlus Gift Card', 'plugin', 'cgpgiftcard', 'vmpayment');
 			$this->installPlugin ('CardGatePlus Giropay', 'plugin', 'cgpgiropay', 'vmpayment');
 			$this->installPlugin ('CardGatePlus Direct Debit', 'plugin', 'cgpdirectdebit', 'vmpayment');
 			$this->installPlugin ('CardGatePlus Przelewy24', 'plugin', 'cgpprzelewy24', 'vmpayment');
 			$this->installPlugin ('CardGatePlus Afterpay', 'plugin', 'cgpafterpay', 'vmpayment');
 			$this->installPlugin ('CardGatePlus Klarna', 'plugin', 'cgpklarna', 'vmpayment');
 			$this->installPlugin ('CardGatePlus Bitcoin', 'plugin', 'cgpbitcoin', 'vmpayment');
+			$this->installPlugin ('CardGatePlus Billink', 'plugin', 'cgpbillink', 'vmpayment');
 				
 			$task = JRequest::getCmd ('task');
 			
