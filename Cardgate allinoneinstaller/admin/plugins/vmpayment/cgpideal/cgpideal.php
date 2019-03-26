@@ -33,4 +33,11 @@ class plgVMPaymentCgpideal extends plgVMPaymentCgpgeneric {
     
     protected $_plugin_name = "Cgpideal";
     
+    function plgVmDeclarePluginParamsPaymentVM3(&$data) {
+        $b = $this->declarePluginParams('payment', $data);
+        $this->cacheBankOptions($data->virtuemart_paymentmethod_id);
+        return $b;
+    }
+    
+    
 }
