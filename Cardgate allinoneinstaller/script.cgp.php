@@ -192,13 +192,13 @@ if (!defined ('_CGP_SCRIPT_INCLUDED')) {
 
 					if (!$table->check ($data)) {
 						$app = JFactory::getApplication ();
-						$app->enqueueMessage ('CGPnstaller table->check throws error for ' . $name . ' ' . $type . ' ' . $element . ' ' . $group);
+						$app->enqueueMessage ('CGPInstaller table->check throws error for ' . $name . ' ' . $type . ' ' . $element . ' ' . $group);
 
 					}
 
 					if (!$table->store ($data)) {
 						$app = JFactory::getApplication ();
-						$app->enqueueMessage ('CGPnstaller table->store throws error for ' . $name . ' ' . $type . ' ' . $element . ' ' . $group);
+						$app->enqueueMessage ('CGPInstaller table->store throws error for ' . $name . ' ' . $type . ' ' . $element . ' ' . $group);
 					}
 
 					$errors = $table->getErrors ();
