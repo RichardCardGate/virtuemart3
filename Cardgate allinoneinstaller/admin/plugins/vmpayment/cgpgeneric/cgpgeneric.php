@@ -39,7 +39,7 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
      *
      * @var mixed
      */
-    protected $_plugin_version = "3.0.11";
+    protected $_plugin_version = "3.0.12";
 
     protected $_url = '';
 
@@ -1092,9 +1092,7 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
     }
 
     protected function cacheBankOptions($iPaymentmethodId) {
-        
-        $iCacheTime = 24 * 60 * 60;
-        $iIssuerRefresh = time() + $iCacheTime;
+
         
         if ($this->getIdealParam($iPaymentmethodId,'test_mode')) {
             $sUrl = 'https://secure-staging.curopayments.net/cache/idealDirectoryCUROPayments.dat';
@@ -1126,14 +1124,20 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
                 unset($aPaymentParams[$key]);
             }
         }
-        
+
+	    $iCacheTime = 24 * 60 * 60;
+	    $iIssuerRefresh = time() + $iCacheTime;
+
         $aPaymentParams[] = "issuer_refresh=\"" . $iIssuerRefresh . '"';
         $aPaymentParams[] = "issuers=\"" . base64_encode($sIssuers);
-        
-        $sPaymentParams = implode('|', $aPaymentParams);
-        $query = 'UPDATE #__virtuemart_paymentmethods  SET `payment_params`= \'' . $sPaymentParams . '\' WHERE `virtuemart_paymentmethod_id`= ' . $iPaymentmethodId;
-        $db->setQuery($query);
-        $db->execute();
+
+        $aIssuers = unserialize($sIssuers);
+        if ($aIssuers != false && array_key_exists("INGBNL2A", $aIssuers)){
+		    $sPaymentParams = implode( '|', $aPaymentParams );
+		    $query          = 'UPDATE #__virtuemart_paymentmethods  SET `payment_params`= \'' . $sPaymentParams . '\' WHERE `virtuemart_paymentmethod_id`= ' . $iPaymentmethodId;
+		    $db->setQuery( $query );
+		    $db->execute();
+	    }
     }
 
     private function makeBankOptions($aBanks) {
