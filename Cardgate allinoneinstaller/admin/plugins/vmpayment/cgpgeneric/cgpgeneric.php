@@ -39,7 +39,7 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
      *
      * @var mixed
      */
-    protected $_plugin_version = "3.0.12";
+    protected $_plugin_version = "3.0.13";
 
     protected $_url = '';
 
@@ -421,6 +421,10 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
             case 'billink':
                 $post_variables['option'] = 'billink';
                 break;
+
+	        case 'onlineueberweisen':
+		        $post_variables['option'] = 'onlineueberweisen';
+		        break;
         }
         
         if ($method->test_mode == 'test') {
