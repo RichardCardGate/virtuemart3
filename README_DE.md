@@ -2,6 +2,8 @@
 
 # CardGate Modul für VirtueMart 3.0.0 - 3.0.18
 
+[![Build Status](https://travis-ci.org/cardgate/virtuemart3.svg?branch=master)](https://travis-ci.org/cardgate/virtuemart3)
+
 ## Support
 
 Dieses Modul is geeignet für VirtueMart version **3.0.0 - 3.0.18** mit den Joomla Versionen **2.5, 2.6 and 3.x**
