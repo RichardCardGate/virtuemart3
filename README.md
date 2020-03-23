@@ -14,16 +14,14 @@ The usage of this module requires that you have obtained CardGate credentials.
 Please visit [**My CardGate**](https://my.cardgate.com/) and retrieve your Site ID and Hash key, or contact your accountmanager.
 
 ## Installation
-1. Download and unzip the most recent [**source code**](https://github.com/cardgate/virtuemart3/releases) file on your desktop.
+1. Download the most recent [**cardgate.zip**](https://github.com/cardgate/virtuemart3/releases) file to your desktop.
 
-2. Make a zip file of the **Cardgate allinoneinstaller** folder.
+2. Go to the **admin** section of your webshop and select **Extension manager** from the **Extensions** menu.
 
-3. Go to the **admin** section of your webshop and select **Extension manager** from the **Extensions** menu.
-
-4. At the option **Upload Package File** click on the **Browse...** button.  
-   Select the **CardGate allinoneinstaller.zip** file.
+3. At the option **Upload Package File** click on the **Browse...** button.  
+   Select the **cardgate.zip** file.
    
-5. Click on the **Upload File & Install** button.
+4. Click on the **Upload File & Install** button.
   
 ## Configuration
 

@@ -6,7 +6,7 @@
 
 ## Support
 
-Deze extensie is geschikt voor VirtueMart versie **3.0.0 - 3.0.18** met Joomla versie **2.5, 2.6 and 3.x** .
+Deze extensie is geschikt voor VirtueMart versie **3.0.0 - 3.0.18** met Joomla versie **2.5, 2.6 and 3.x**
 
 ## Voorbereiding
 
@@ -16,16 +16,14 @@ of neem contact op met je accountmanager.
 
 ## Installatie
 
-1. Download en unzip de meest recente [**source code**](https://github.com/cardgate/virtuemart3/releases/) op je bureaublad.
+1. Download het meest recente [**cardgate.zip**](https://github.com/cardgate/virtuemart3/releases/) bestand op je bureaublad.
 
-2. Maak van de **Cardgate allinoneinstaller** map een zip bestand.
+2. Ga naar het **admin** gedeelte van je webshop en selecteer **Extensiebeheer** uit het **Extensies** menu.
 
-3. Ga naar het **admin** gedeelte van je webshop en selecteer **Extensiebeheer** uit het **Extensies** menu.
-
-4. Bij de optie **Upload pakketbestand** klik op de knop **Bladeren...**   
-   Selecteer het **CardGate allinoneinstaller.zip** bestand.
+3. Bij de optie **Upload pakketbestand** klik op de knop **Bladeren...**   
+   Selecteer het **cardgate.zip** bestand.
    
-5. Klik op de knop **Uploaden & Installeren**.  
+4. Klik op de knop **Uploaden & Installeren**.  
   
 ## Configuratie
 

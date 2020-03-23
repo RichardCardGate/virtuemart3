@@ -15,16 +15,14 @@ Gehen Sie zu [**Mein CardGate**](https://my.cardgate.com/) und fragen Sie Ihre *
 
 ## Installation
 
-1. Downloaden und entpacken Sie den aktuellsten [**source code**](https://github.com/cardgate/virtuemart3/releases) auf Ihrem Desktop.
+1. Downloaden Sie den aktuellsten [**cardgate.zip**](https://github.com/cardgate/virtuemart3/releases) Datei auf Ihrem Desktop.
 
-2. Make a zip file of the **Cardgate allinoneinstaller** folder.
-
-3. Gehen Sie zum **Adminbereich** Ihres Webshops und wählen Sie **Extensionmanager** aus **Extensions** aus.
+2. Gehen Sie zum **Adminbereich** Ihres Webshops und wählen Sie **Extensionmanager** aus **Extensions** aus.
  
-4. Klicken Sie bei der Option **Datei hochladen** auf **Browse...**  
-   Selektieren Sie den **CardGate allinoneinstaller.zip** Ordner.
+3. Klicken Sie bei der Option **Datei hochladen** auf **Browse...**  
+   Selektieren Sie den **cardgate.zip** Ordner.
    
-5. Klicken Sie auf den **Datei hochladen & installlieren** Button.
+4. Klicken Sie auf den **Datei hochladen & installlieren** Button.
   
 ## Configuration
 
@@ -36,7 +34,7 @@ Gehen Sie zu [**Mein CardGate**](https://my.cardgate.com/) und fragen Sie Ihre *
 
 4. Wählen Sie das **Payment Method Information** Tab aus.
 
-5. Füllen Sie den **Name** der Zahlungsmethode aus uns wählen Sie die gewünschte **Zahlungsmethode**.
+5. Füllen Sie den **Name** der Zahlungsmethode aus und wählen Sie die gewünschte **Zahlungsmethode**.
 
 6. Füllen Sie weitere Informationen in diesem Tab ein und klicken Sie auf Speichern.
 
