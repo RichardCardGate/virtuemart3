@@ -1,12 +1,6 @@
 *
 !Cardgate allinoneinstaller
-!tests
-!tests/bootstrap.php
-!tests/phpunit.xml
 !README.md
 !README_DE.md
 !README.NL.md
 !copyfiles.php
-!.travis.yml
-!composer.json
-!phpunit.xml.dist
