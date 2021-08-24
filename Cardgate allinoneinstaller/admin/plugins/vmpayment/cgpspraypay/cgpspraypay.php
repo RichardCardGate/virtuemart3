@@ -18,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * @category    VMPayment
- * @package     cgpprzelewy24
+ * @package     cgpspraypay
  * @author      Paul Saparov, <support@cardgate.com>
  * @copyright   Copyright (c) 2012 Card Gate Plus B.V. - All rights reserved.
  * @license     http://www.gnu.org/copyleft/gpl.html GNU/GPL
@@ -29,8 +29,8 @@ if (!class_exists('plgVMPaymentCgpgeneric')) {
     require(JPATH_PLUGINS . DS . 'vmpayment' . DS . 'cgpgeneric' . DS . 'cgpgeneric.php');
 }
 
-class plgVMPaymentCgpprzelewy24 extends plgVMPaymentCgpgeneric {
+class plgVMPaymentCgpspraypay extends plgVMPaymentCgpgeneric {
     
-    protected $_plugin_name = "Cgpprzelewy24";
+    protected $_plugin_name = "Cgpspraypay";
     
 }

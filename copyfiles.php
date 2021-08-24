@@ -143,6 +143,10 @@ $zip->close();
     $dst = 'Cardgate allinoneinstaller/admin/plugins/vmpayment/cgpsofortbanking/';
     $is_dir = true;
     array_push( $data, data_element( $src, $dst, $is_dir ) );
+	$src = '../plugins/vmpayment/cgpspraypay';
+	$dst = 'Cardgate allinoneinstaller/admin/plugins/vmpayment/cgpspraypay/';
+	$is_dir = true;
+	array_push( $data, data_element( $src, $dst, $is_dir ) );
 
 
 // copy files

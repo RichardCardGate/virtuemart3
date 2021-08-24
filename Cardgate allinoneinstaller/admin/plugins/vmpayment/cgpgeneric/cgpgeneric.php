@@ -44,7 +44,7 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
 	 *
 	 * @var mixed
 	 */
-	protected $_plugin_version = "3.1.15";
+	protected $_plugin_version = "3.1.16";
 
 	protected $_url = '';
 
@@ -429,6 +429,9 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
 
 			case 'onlineueberweisen':
 				$post_variables['option'] = 'onlineueberweisen';
+				break;
+			case 'spraypay':
+				$post_variables['option'] = 'spraypay';
 				break;
 		}
 
