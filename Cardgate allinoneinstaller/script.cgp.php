@@ -104,6 +104,7 @@ if (!defined ('_CGP_SCRIPT_INCLUDED')) {
 			$this->installPlugin ('CardGatePlus Klarna', 'plugin', 'cgpklarna', 'vmpayment');
 			$this->installPlugin ('CardGatePlus Bitcoin', 'plugin', 'cgpbitcoin', 'vmpayment');
 			$this->installPlugin ('CardGatePlus Billink', 'plugin', 'cgpbillink', 'vmpayment');
+			$this->installPlugin ('CardGatePlus SprayPay', 'plugin', 'cgpspraypay', 'vmpayment');
 				
 			$task = JRequest::getCmd ('task');
 			
