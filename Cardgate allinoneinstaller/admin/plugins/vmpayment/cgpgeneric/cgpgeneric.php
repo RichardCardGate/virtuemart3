@@ -211,6 +211,7 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
 	 * @return null|boolean
 	 */
 	public function plgVmConfirmedOrder($cart, $order) {
+
 		$iPaymentmethodId = $order['details']['BT']->virtuemart_paymentmethod_id;
 		if (! ($method = $this->getVmPluginMethod($iPaymentmethodId))) {
 			return null;
@@ -222,8 +223,11 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
 
 		$this->set_url($method->test_mode == 'test');
 
-		$cartitems = array();
+		$cartItems = array();
 		$products = $cart->products;
+
+		$taxTotal = 0;
+		$itemTotal = 0;
 
 		foreach ($products as $product) {
 			$item = array();
@@ -231,12 +235,14 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
 			$item['sku'] = $product->product_sku;
 			$item['name'] = $product->product_name;
 			$prices = $product->prices;
-
-			$item['price'] = round($prices['salesPrice'] * 100, 0);
-			$item['vat_amount'] = round($prices['taxAmount'] * 100, 0);
-			$item['vat_inc'] = 1;
+			$item['price'] = (int)round($prices['product_price'] * 100, 0);
+			$item['vat_amount'] = (int)round($prices['taxAmount'] * 100, 0);
+			$item['vat_inc'] = 0;
 			$item['type'] = 1;
-			$cartitems[] = $item;
+			$cartItems[] = $item;
+			$taxTotal += $item['quantity'] * $item['vat_amount'];
+			$itemTotal += $item['quantity'] * ($item['price']);
+
 		}
 
 		$orderDetails = $cart->orderDetails['details']['BT'];
@@ -246,22 +252,26 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
 			$item['quantity'] = 1;
 			$item['sku'] = $orderDetails->virtuemart_shipmentmethod_id;
 			$item['name'] = 'SHIPPING';
-			$item['price'] = round(($orderDetails->order_shipment + $orderDetails->order_shipment_tax) * 100, 0);
-			$item['vat_amount'] = round($orderDetails->order_shipment_tax * 100, 0);
-			$item['vat_inc'] = 1;
+			$item['price'] = (int)round(($orderDetails->order_shipment) * 100, 0);
+			$item['vat_amount'] = (int)round($orderDetails->order_shipment_tax * 100, 0);
+			$item['vat_inc'] = 0;
 			$item['type'] = 2;
-			$cartitems[] = $item;
+			$cartItems[] = $item;
+			$taxTotal += $item['vat_amount'];
+			$itemTotal += $item['price'];
 		}
+
 		if ($orderDetails->order_billDiscountAmount < 0) {
 			$item = array();
 			$item['quantity'] = 1;
 			$item['sku'] = 'order_bill_discount';
 			$item['name'] = 'OrderBill Discount';
-			$item['price'] = round($orderDetails->order_billDiscountAmount * 100, 0);
+			$item['price'] = (int)round($orderDetails->order_billDiscountAmount * 100, 0);
 			$item['vat_amount'] = 0;
-			$item['vat_inc'] = 1;
+			$item['vat_inc'] = 0;
 			$item['type'] = 4;
-			$cartitems[] = $item;
+			$cartItems[] = $item;
+			$itemTotal += $item['price'];
 		}
 
 		if ($orderDetails->order_discountAmount < 0) {
@@ -271,11 +281,38 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
 			$item['name'] = 'Order Discount';
 			$item['price'] = round($orderDetails->order_discountAmount * 100, 0);
 			$item['vat_amount'] = 0;
-			$item['vat_inc'] = 1;
+			$item['vat_inc'] = 0;
 			$item['type'] = 4;
-			$cartitems[] = $item;
+			$cartItems[] = $item;
+			$itemTotal += $item['price'];
 		}
 
+		$orderTax = (int)round($orderDetails->order_tax * 100);
+
+		if (abs($orderTax - $taxTotal) > 0){
+			$item = array();
+			$item['quantity'] = 1;
+			$item['sku'] = 'vat_correction';
+			$item['name'] = 'vat_correction';
+			$item['price'] = round(($orderTax - $taxTotal), 0);
+			$item['vat_amount'] = 0;
+			$item['vat_inc'] = 0;
+			$item['type'] = 7;
+			$cartItems[] = $item;
+		}
+
+		$orderTotal = (int)round($orderDetails->order_total * 100);
+		if (abs($orderTotal - $itemTotal - $taxTotal) > 0){
+			$item = array();
+			$item['quantity'] = 1;
+			$item['sku'] = 'item_correction';
+			$item['name'] = 'item_correction';
+			$item['price'] = round(($orderTotal - $itemTotal - $taxTotal), 0);
+			$item['vat_amount'] = 0;
+			$item['vat_inc'] = 0;
+			$item['type'] = 6;
+			$cartItems[] = $item;
+		}
 		$session = JFactory::getSession();
 		$return_context = $session->getId();
 		$this->_debug = $method->debug; // enable debug
@@ -350,7 +387,7 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
 			"plugin_name" => $this->_plugin_name,
 			"plugin_version" => $this->_plugin_version,
 			"extra" => $order['details']['BT']->order_number,
-			"cartitems" => json_encode($cartitems, JSON_HEX_APOS | JSON_HEX_QUOT)
+			"cartitems" => json_encode($cartItems, JSON_HEX_APOS | JSON_HEX_QUOT)
 		);
 
 		switch (substr($this->_plugin_name, 3)) {
@@ -429,9 +466,6 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
 
 			case 'onlineueberweisen':
 				$post_variables['option'] = 'onlineueberweisen';
-				break;
-			case 'spraypay':
-				$post_variables['option'] = 'spraypay';
 				break;
 		}
 
