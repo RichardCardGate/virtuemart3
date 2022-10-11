@@ -1,12 +1,12 @@
 ![CardGate](https://cdn.curopayments.net/thumb/200/logos/cardgate.png)
 
-# CardGate Modul für VirtueMart 3.x
+# CardGate Modul für VirtueMart 3.x - 4.x
 
 [![Build Status](https://travis-ci.org/cardgate/virtuemart3.svg?branch=master)](https://travis-ci.org/cardgate/virtuemart3)
 
 ## Support
 
-Dieses Modul is geeignet für VirtueMart version **3.x** mit den Joomla Versionen **2.5, 2.6 and 3.x**
+Dieses Modul is geeignet für VirtueMart version **3.x** und **4.x** mit den Joomla Versionen **2.5, 2.6 and 3.x**
 
 ## Vorbereitung
 
