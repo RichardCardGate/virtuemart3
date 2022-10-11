@@ -44,7 +44,7 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
      *
      * @var mixed
      */
-    protected $_plugin_version = "3.1.18";
+    protected $_plugin_version = "3.1.19";
 
     protected $_url = '';
 
@@ -338,7 +338,7 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
         $vendor = $vendorModel->getVendor();
         $this->getPaymentCurrency($method);
         $q = 'SELECT `currency_code_3` FROM `#__virtuemart_currencies` WHERE `virtuemart_currency_id`="' . $method->payment_currency . '" ';
-        $db = &JFactory::getDBO();
+        $db = JFactory::getDBO();
         $db->setQuery($q);
 
         // Obtain order's currency and amount
@@ -722,7 +722,7 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
                 return false;
             }
 
-            if ($thisOrder[details][BT]->order_status != $method->status_success) {
+            if ($thisOrder['details']['BT']->order_status != $method->status_success) {
                 // Send email if HASH verification failed
                 $hashString = ($method->test_mode == 'test' ? 'TEST' : '') . $data['transaction_id'] . $data['currency'] . $data['amount'] . $data['ref'] . $data['status'] . $method->hash_key;
 
@@ -743,9 +743,7 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
 
                 // Get all know columns of the table
                 $db = JFactory::getDBO();
-                $query = 'SHOW COLUMNS FROM `' . $this->_tablename . '` ';
-                $db->setQuery($query);
-                $columns = $db->loadResultArray(0);
+                $columns = $db->getTableColumns($this->_tablename);
                 $post_msg = '';
 
                 // Save all cgp_response_<field> data
@@ -819,7 +817,7 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
 
         $this->getPaymentCurrency($paymentTable);
         $q = 'SELECT `currency_code_3` FROM `#__virtuemart_currencies` WHERE `virtuemart_currency_id`="' . $paymentTable->payment_currency . '" ';
-        $db = &JFactory::getDBO();
+        $db = JFactory::getDBO();
         $db->setQuery($q);
         $currency_code_3 = $db->loadResult();
         $html = '<table class="adminlist">' . "\n";
@@ -849,7 +847,7 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
     protected function getPaymentResponseHtml($order, $payment_name) {
         $currency_id = $order['details']['BT']->order_currency;
         $q = 'SELECT `currency_symbol` FROM `#__virtuemart_currencies` WHERE `virtuemart_currency_id`="' . $currency_id . '" ';
-        $db = &JFactory::getDBO();
+        $db = JFactory::getDBO();
         $db->setQuery($q);
 
         // Obtain order's currency and amount
