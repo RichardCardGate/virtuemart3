@@ -19,8 +19,8 @@
  *
  * @category    VMPayment
  * @package     cgpbitcoin
- * @author      Paul Saparov, <support@cardgate.com>
- * @copyright   Copyright (c) 2012 Card Gate Plus B.V. - All rights reserved.
+ * @author      CardGate B.V., <info@cardgate.com>
+ * @copyright   Copyright (c) 2022 CardGate B.V. - All rights reserved.
  * @license     http://www.gnu.org/copyleft/gpl.html GNU/GPL
  */
 defined('_JEXEC') or die('Direct Access to ' . basename(__FILE__) . ' is not allowed.');

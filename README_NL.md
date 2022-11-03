@@ -43,17 +43,19 @@ of neem contact op met je accountmanager.
 
 8. Vul de **site ID** en de **hash key** in, deze kun je vinden bij **Sites** op [**Mijn CardGate**](https://my.cardgate.com/).
 
-9. Vul de andere relevante configuratie informatie in en klik op **Opslaan** en **Sluiten**.
+9. Vul de **Merchant ID** en de **API key** in, deze worden  door uw account manager verstrekt.
 
-10. Herhaal de **stappen 3 tot en met 9** voor iedere **betaalmethode** die je wenst te activeren.
+10. Vul de andere relevante configuratie informatie in en klik op **Opslaan** en **Sluiten**.
 
-11. Ga naar [**Mijn CardGate**](https://my.cardgate.com/), kies **Sites** en selecteer de juiste site.
+11. Herhaal de **stappen 3 tot en met 10** voor iedere **betaalmethode** die je wenst te activeren.
 
-12. Vul bij **Technische Koppeling** de **Callback URL** in, bijvoorbeeld:  
+12. Ga naar [**Mijn CardGate**](https://my.cardgate.com/), kies **Sites** en selecteer de juiste site.
+
+13. Vul bij **Technische Koppeling** de **Callback URL** in, bijvoorbeeld:  
     **http://mijnwebshop.com/index.php?option=com_cgp&task=callback**  
    (Vervang **http://mijnwebshop.com** met de URL van je webshop)  
 
-13. Zorg ervoor dat je na het testen **alle betaalmethoden** omschakelt van **Test Mode** naar **Live mode** en sla het op (**Save**).
+14. Zorg ervoor dat je na het testen **alle betaalmethoden** omschakelt van **Test Mode** naar **Live mode** en sla het op (**Save**).
  
 ## Vereisten
 

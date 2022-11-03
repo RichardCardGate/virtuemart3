@@ -17,8 +17,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @author      Paul Saparov, <support@cardgate.com>
- * @copyright   Copyright (c) 2012 Card Gate Plus B.V. - All rights reserved.
+ * @author      CardGate B.V., <info@cardgate.com>
+ * @copyright   Copyright (c) 2022 CardGate B.V. - All rights reserved.
  * @license     http://www.gnu.org/copyleft/gpl.html GNU/GPL
  */
 
