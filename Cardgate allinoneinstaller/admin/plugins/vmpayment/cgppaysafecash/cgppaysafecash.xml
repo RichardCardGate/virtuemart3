@@ -6,7 +6,7 @@
     <authorUrl>http://www.cardgate.com/</authorUrl>
     <copyright>Copyright (c) 2015 Card Gate Plus B.V. All rights reserved.</copyright>
     <license>http://www.gnu.org/licenses/gpl-3.0.html GNU/GPL</license>
-    <version>3.1.19</version>
+    <version>4.0.0</version>
     <description><![CDATA[<a href="http://www.cardgate.com/" target="_blank">Card Gate Plus</a> is providing various payment solutions for the internet market ]]></description>
     <files>
         <filename plugin="cgppaysafecash">cgppaysafecash.php</filename>
@@ -26,6 +26,8 @@
                 </field>
                 <field type="text" name="site_id" label="VMPAYMENT_CGPPAYSAFECASH_SITE_ID" description="VMPAYMENT_CGPPAYSAFECASH_SITE_ID_DESC" />
                 <field type="text" name="hash_key" label="VMPAYMENT_CGPPAYSAFECASH_HASH_KEY" description="VMPAYMENT_CGPPAYSAFECASH_HASH_KEY_DESC"  />
+                <field type="text" name="merchant_id" label="VMPAYMENT_CGPPAYSAFECASH_MERCHANT_ID" description="VMPAYMENT_CGPPAYSAFECASH_MERCHANT_ID_DESC" />
+                <field type="password" name="api_key" label="VMPAYMENT_CGPPAYSAFECASH_API_KEY" description="VMPAYMENT_CGPPAYSAFECASH_API_KEY_DESC" />
                 <field type="list" name="gateway_language" default="nl" label="VMPAYMENT_CGPPAYSAFECASH_GATEWAY_LANGUAGE" description="VMPAYMENT_CGPPAYSAFECASH_GATEWAY_LANGUAGE_DESC">
                     <option value="nl">VMPAYMENT_CGPPAYSAFECASH_GATEWAY_LANGUAGE_OPT_DUTCH</option>
                     <option value="en">VMPAYMENT_CGPPAYSAFECASH_GATEWAY_LANGUAGE_OPT_ENGLISH</option>

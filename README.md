@@ -41,17 +41,19 @@ Please visit [**My CardGate**](https://my.cardgate.com/) and retrieve your Site 
 
 8. Enter the **site ID** and the **hash key**, which you can find at **Sites** on [**My CardGate**](https://my.cardgate.com/).
 
-9. Enter the other relevant configuration information and click on **Save** and **Close**.
+9. Enter the **Merchant ID** and the **API key**, which will be provided by your account manager.
 
-10. Repeat **steps 3 to 9** for each **payment method** you wish to activate.
+10. Enter the other relevant configuration information and click on **Save** and **Close**.
 
-11. Go to [**My CardGate**](https://my.cardgate.com/), choose **Sites** and select the appropriate site.
+11. Repeat **steps 3 to 10** for each **payment method** you wish to activate.
 
-12. Go to **Connection to the website** and enter the **Callback URL**, for example:
+12. Go to [**My CardGate**](https://my.cardgate.com/), choose **Sites** and select the appropriate site.
+
+13. Go to **Connection to the website** and enter the **Callback URL**, for example:
     **http://mywebshop.com/index.php?option=com_cgp&task=callback**
     (Replace **http://mywebshop.com** with the URL of your webshop)
 
-13. When you are **finished testing** make sure that you switch **all activated payment methods** from **Test Mode** to **Live mode** and save it (**Save**). 
+14. When you are **finished testing** make sure that you switch **all activated payment methods** from **Test Mode** to **Live mode** and save it (**Save**). 
  
 ## Requirements
 

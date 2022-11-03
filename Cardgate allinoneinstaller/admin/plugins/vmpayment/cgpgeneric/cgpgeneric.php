@@ -24,6 +24,9 @@
  * @copyright   Copyright (c) 2013 Card Gate Plus B.V. - All rights reserved.
  * @license     http://www.gnu.org/copyleft/gpl.html GNU/GPL
  */
+require_once dirname( __FILE__ ) . '/cardgate-clientlib-php/src/Autoloader.php';
+cardgate\api\Autoloader::register();
+
 defined('_JEXEC') or die('Direct Access to ' . basename(__FILE__) . ' is not allowed.');
 
 if(!class_exists('VmConfig')) {
@@ -44,9 +47,12 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
      *
      * @var mixed
      */
-    protected $_plugin_version = "3.1.19";
-
+    protected $_plugin_version = "4.0.0";
     protected $_url = '';
+    protected $_merchant_id = '';
+    protected $_api_key= '';
+    protected $_test_mode = false;
+
 
     /**
      * Base constructor
@@ -77,6 +83,13 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
                 '',
                 'char'
             ),
+            'merchant_id' => array(
+                '',
+                'char'
+            ),
+            'api_key' => array(
+                '',
+                'char'),
             'gateway_language' => array(
                 'nl',
                 'char'
@@ -134,6 +147,9 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
                 'int'
             )
         );
+        if ($this->_name == 'cgpideal'){
+            $varsToPush['issuer_refresh'] = array(0,'int');
+        }
         $this->setConfigParameterable($this->_configTableFieldName, $varsToPush);
     }
 
@@ -221,8 +237,12 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
             return false;
         }
 
-        $this->set_url($method->test_mode == 'test');
+        $this->merchant_id = (int)$method->merchant_id;
+        $this->api_key = $method->api_key;
+        $this->test_mode = ($method->test_mode == 'test' ? true : false);
 
+        $method_name = substr($this->_plugin_name, 3);
+        $this->set_url($method->test_mode == 'test');
         $cartItems = array();
         $products = $order['items'];
         $details = $order['details']['BT'];
@@ -239,7 +259,7 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
             $item['price'] = (int)round($price * 100, 0);
             $item['vat_amount'] = (int)round($product->product_tax * 100, 0);
             $item['vat_inc'] = 0;
-            $item['type'] = 1;
+            $item['type'] = 'product';
             $cartItems[] = $item;
             $taxTotal += (int)($item['quantity'] * $product->product_tax * 100);
             $itemTotal += $item['quantity'] * ($item['price']);
@@ -254,7 +274,7 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
             $item['price'] = (int)round($cart->cartPrices['shipmentValue'] * 100, 0);
             $item['vat_amount'] = (int)round($cart->cartPrices['shipmentTax'] * 100, 0);
             $item['vat_inc'] = 0;
-            $item['type'] = 2;
+            $item['type'] = 'shipping';
             $cartItems[] = $item;
             $taxTotal += $item['vat_amount'];
             $itemTotal += $item['price'];
@@ -268,7 +288,7 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
             $item['price'] = round($details->coupon_discount * 100, 0);
             $item['vat_amount'] = 0;
             $item['vat_inc'] = 0;
-            $item['type'] = 4;
+            $item['type'] = 'discount';
             $cartItems[] = $item;
             $itemTotal += $item['price'];
         }
@@ -276,12 +296,12 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
         if (!empty($details->order_payment) && $details->order_payment > 0) {
             $item = array();
             $item['quantity'] = 1;
-            $item['sku'] = 'payment_cost';
-            $item['name'] = 'Payment cost';
+            $item['sku'] = 'payment_fee';
+            $item['name'] = 'Payment fee';
             $item['price'] = round($details->order_payment * 100, 0);
             $item['vat_amount'] = round($details->order_payment_tax * 100, 0);
             $item['vat_inc'] = 0;
-            $item['type'] = 5;
+            $item['type'] = 'paymentfee';
             $cartItems[] = $item;
             $taxTotal += $item['vat_amount'];
             $itemTotal += $item['price'];
@@ -297,7 +317,7 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
             $item['price'] = round(($orderTax - $taxTotal), 0);
             $item['vat_amount'] = 0;
             $item['vat_inc'] = 0;
-            $item['type'] = 7;
+            $item['type'] = 'vatcorrection';
             $cartItems[] = $item;
         }
 
@@ -310,7 +330,7 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
             $item['price'] = round(($orderTotal - (int)$itemTotal - (int)$taxTotal), 0);
             $item['vat_amount'] = 0;
             $item['vat_inc'] = 0;
-            $item['type'] = 6;
+            $item['type'] = 'correction';
             $cartItems[] = $item;
         }
         $session = JFactory::getSession();
@@ -329,7 +349,6 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
 
         // Load customer address details
         $new_status = '';
-        $usrBT = $order['details']['BT'];
         $address = $order['details']['BT'];
 
         // Load vendor
@@ -348,8 +367,11 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
         $cd = CurrencyDisplay::getInstance($cart->pricesCurrency);
 
         // Validate SiteID and HashKey
-        $site_id = $method->site_id;
+        $site_id = (int)$method->site_id;
         $hash_key = $method->hash_key;
+        $merchant_id = (int)$method->merchant_id;
+        $api_key = $method->api_key;
+        $test_mode = ($method->test_mode == 'test' ? true : false);
 
         if (empty($site_id)) {
             vmInfo(JText::_('VMPAYMENT_' . strtoupper($this->_plugin_name) . '_SITE_ID_NOT_SET'));
@@ -361,121 +383,122 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
             return false;
         }
 
-        $ref = 'O' . time() . $order['details']['BT']->order_number;
-
-        // Create POST variables
-        $post_variables = array(
-            "siteid" => $site_id,
-            "ref" => $ref,
-            "amount" => $amount,
-            "currency" => $currency_code_3,
-            "description" => JText::_('VMPAYMENT_' . strtoupper($this->_plugin_name) . '_ORDER_DESCRIPTION') . " " . $order['details']['BT']->order_number,
-            "first_name" => $address->first_name,
-            "last_name" => $address->last_name,
-            "email" => $address->email,
-            "address" => $address->address_1 . (isset($address->address_2) ? ', ' . $address->address_2 : ''),
-            "city" => $address->city,
-            "country_code" => ShopFunctions::getCountryByID($address->virtuemart_country_id, 'country_2_code'),
-            "postal_code" => $address->zip,
-            "phone_number" => $address->phone_1,
-            "state" => isset($address->virtuemart_state_id) ? ShopFunctions::getStateByID($address->virtuemart_state_id) : '',
-            "language" => $method->gateway_language,
-            "return_url" => JROUTE::_(JURI::root() . 'index.php?option=com_virtuemart&view=pluginresponse&task=pluginResponseReceived&on=' . $order['details']['BT']->order_number . '&pm=' . $order['details']['BT']->virtuemart_paymentmethod_id),
-            "return_url_failed" => JROUTE::_(JURI::root() . 'index.php?option=com_virtuemart&view=pluginresponse&task=pluginUserPaymentCancel&on=' . $order['details']['BT']->order_number . '&pm=' . $order['details']['BT']->virtuemart_paymentmethod_id),
-            "shop_name" => vmVersion::$PRODUCT,
-            "shop_version" => vmVersion::$RELEASE,
-            "plugin_name" => $this->_plugin_name,
-            "plugin_version" => $this->_plugin_version,
-            "extra" => $order['details']['BT']->order_number,
-            "cartitems" => json_encode($cartItems, JSON_HEX_APOS | JSON_HEX_QUOT)
-        );
-
-        switch (substr($this->_plugin_name, 3)) {
-            case 'visa':
-            case 'mastercard':
-            case 'americanexpress':
-            case 'maestro':
-            case 'vpay':
-            case 'creditcard':
-                $post_variables['option'] = 'creditcard';
-                break;
-
-            case 'sofortbanking':
-                $post_variables['option'] = 'directebanking';
-                break;
-
-            case 'ideal':
-                $post_variables['option'] = 'ideal';
-                break;
-
-            case 'idealqr':
-                $post_variables['option'] = 'idealqr';
-                break;
-
-            case 'mistercash':
-                $post_variables['option'] = 'mistercash';
-                break;
-
-            case 'paypal':
-                $post_variables['option'] = 'paypal';
-                break;
-
-            case 'paysafecard':
-                $post_variables['option'] = 'paysafecard';
-                break;
-
-            case 'paysafecash':
-                $post_variables['option'] = 'paysafecash';
-                break;
-
-            case 'banktransfer':
-                $post_variables['option'] = 'banktransfer';
-                break;
-
-            case 'giropay':
-                $post_variables['option'] = 'giropay';
-                break;
-
-            case 'giftcard':
-                $post_variables['option'] = 'giftcard';
-                break;
-
-            case 'directdebit':
-                $post_variables['option'] = 'directdebit';
-                break;
-
-            case 'przelewy24':
-                $post_variables['option'] = 'przelewy24';
-                break;
-
-            case 'afterpay':
-                $post_variables['option'] = 'afterpay';
-                break;
-
-            case 'klarna':
-                $post_variables['option'] = 'klarna';
-                break;
-
-            case 'bitcoin':
-                $post_variables['option'] = 'bitcoin';
-                break;
-
-            case 'billink':
-                $post_variables['option'] = 'billink';
-                break;
-
-            case 'onlineueberweisen':
-                $post_variables['option'] = 'onlineueberweisen';
-                break;
+        if (empty($merchant_id)) {
+            vmInfo(JText::_('VMPAYMENT_' . strtoupper($this->_plugin_name) . '_MERCHANT_ID_NOT_SET'));
+            return false;
         }
 
-        if ($method->test_mode == 'test') {
-            $post_variables['test'] = '1';
-            $hash_prefix = 'TEST';
+        if (empty($api_key)) {
+            vmInfo(JText::_('VMPAYMENT_' . strtoupper($this->_plugin_name) . '_API_KEY_NOT_SET'));
+            return false;
+        }
+
+        $oCardGate = new cardgate\api\Client( $merchant_id, $api_key, $test_mode );
+
+        $oCardGate->setIp( $_SERVER['REMOTE_ADDR'] );
+
+        $oCardGate->setLanguage( $method->gateway_language );
+        $oCardGate->version()->setPlatformName( vmVersion::$PRODUCT);
+        $oCardGate->version()->setPlatformVersion( vmVersion::$RELEASE);
+        $oCardGate->version()->setPluginName( $this->_plugin_name );
+        $oCardGate->version()->setPluginVersion( $this->_plugin_version );
+
+        $oTransaction = $oCardGate->transactions()->create( $site_id, $amount, $currency_code_3 );
+
+        // Configure payment option.
+        $oTransaction->setPaymentMethod( $method_name);
+
+        if ( $method_name == 'ideal' ) {
+            $oTransaction->setIssuer( $_POST['cgp_ideal_issuer']);
+        }
+
+        // Configure customer.
+
+        $oConsumer = $oTransaction->getConsumer();
+        if ( $address->email != '' ) {
+            $oConsumer->setEmail( $address->email );
+        }
+        if (  $address->phone_1 != '' ) {
+            $oConsumer->setPhone(  $address->phone_1 );
+        }
+        if ( $address->first_name != '' ) {
+            $oConsumer->address()->setFirstName( $address->first_name );
+        }
+        if ( $address->last_name != '' ) {
+            $oConsumer->address()->setLastName( $address->last_name );
+        }
+        if ( $address->address_1!= '' ) {
+            $oConsumer->address()->setAddress( $address->address_1 . (isset($address->address_2) ? ', ' . $address->address_2 : '') );
+        }
+        if ( $address->zip != '' ) {
+            $oConsumer->address()->setZipCode( $address->zip );
+        }
+        if ( $address->city != '' ) {
+            $oConsumer->address()->setCity( $address->city );
+        }
+        if ( $address->virtuemart_state_id != '' ) {
+            $oConsumer->address()->setState(isset($address->virtuemart_state_id) ? ShopFunctions::getStateByID($address->virtuemart_state_id) : '');
+        }
+        if ($address->virtuemart_country_id != '' ) {
+            $oConsumer->address()->setCountry( ShopFunctions::getCountryByID($address->virtuemart_country_id, 'country_2_code') );
+        }
+        if ($details->STsameAsBT == 1){
+            $q=1;
+        }
+        $oCart = $oTransaction->getCart();
+
+        foreach ( $cartItems as $item ) {
+
+            switch ( $item['type'] ) {
+                case 'product':
+                    $iItemType = \cardgate\api\Item::TYPE_PRODUCT;
+                    break;
+                case 'shipping':
+                    $iItemType = \cardgate\api\Item::TYPE_SHIPPING;
+                    break;
+                case 'paymentfee':
+                    $iItemType = \cardgate\api\Item::TYPE_HANDLING;
+                    break;
+                case 'discount':
+                    $iItemType = \cardgate\api\Item::TYPE_DISCOUNT;
+                    break;
+                case 'correction':
+                    $iItemType = \cardgate\api\Item::TYPE_CORRECTION;
+                    break;
+                case 'vatcorrection':
+                    $iItemType = \cardgate\api\Item::TYPE_VAT_CORRECTION;
+                    break;
+            }
+
+            $oItem = $oCart->addItem( $iItemType, $item['sku'], $item['name'], (int) $item['quantity'], (int) $item['price'] );
+            $oItem->setVatAmount( $item['vat_amount'] );
+            $oItem->setVatIncluded( 0 );
+        }
+
+        $oTransaction->setCallbackUrl( JROUTE::_(JURI::root() . 'index.php?option=com_cgp&task=callback' ));
+        $oTransaction->setSuccessUrl( JROUTE::_(JURI::root() . 'index.php?option=com_virtuemart&view=pluginresponse&task=pluginResponseReceived&on=' . $order['details']['BT']->order_number . '&pm=' . $order['details']['BT']->virtuemart_paymentmethod_id) );
+        $oTransaction->setFailureUrl( JROUTE::_(JURI::root() . 'index.php/cart') );
+        $oTransaction->setReference( 'O' . time() . $order['details']['BT']->order_number );
+        $oTransaction->setDescription( JText::_('VMPAYMENT_' . strtoupper($this->_plugin_name) . '_ORDER_DESCRIPTION') . " " . $order['details']['BT']->order_number );
+
+        $oTransaction->register();
+
+        $sActionUrl = $oTransaction->getActionUrl();
+
+        if ( null !== $sActionUrl ) {
+            $html = '<form action="' . $sActionUrl . '" method="post" name="vm_cgp_form" >';
+            $html .= '</form>';
+            $html .= '<script type="text/javascript">';
+            $html .= '    document.vm_cgp_form.submit();';
+            $html .= '</script>';
+            // 2 = don't delete the cart, don't send email and don't redirect
+            return $this->processConfirmedOrderPaymentResponse(2, $cart, $order, $html, $new_status);
         } else {
-            $hash_prefix = '';
+            $sErrorMessage = 'CardGate error: ' .'no redirect URL';
+            vmInfo(JText::_($sErrorMessage));
+            return false;
+
         }
-        $post_variables['hash'] = md5($hash_prefix . $site_id . $amount . $ref . $hash_key);
 
         $this->logInfo('plgVmConfirmedOrder Initiating a new transaction', 'message');
         $this->logInfo('plgVmConfirmedOrder Sending customer to CardGatePlus with values: ' . var_export($post_variables, true), 'message');
@@ -499,6 +522,9 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
         $html = '<form action="' . $url . '" method="post" name="vm_cgp_form" >';
         foreach ($post_variables as $name => $value) {
             $html .= '<input type="hidden" name="' . $name . '" value="' . htmlspecialchars($value) . '" />';
+            $html .= '<script type="text/javascript">';
+            $html .= '    document.vm_cgp_form.submit();';
+            $html .= '</script>';
         }
         // Add for iDEAL bank options
         if (substr($this->_plugin_name, 3) == "ideal") {
@@ -610,7 +636,13 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
         // Display order info
         $payment_name = $this->renderPluginName($method);
         $html = $this->getPaymentResponseHtml($order, $payment_name);
-        vmInfo(JText::_('VMPAYMENT_' . strtoupper($this->_plugin_name) . '_PAYMENT_SUCCESS'));
+        $code = JRequest::getVar('code');
+        if ($code >=200 && $code < 300) {
+            vmInfo( JText::_( 'VMPAYMENT_' . strtoupper( $this->_plugin_name ) . '_PAYMENT_SUCCESS' ) );
+        }
+        if ($code == 0 || ($code >= 700 && $code < 800)){
+            vmInfo( JText::_( 'VMPAYMENT_' . strtoupper( $this->_plugin_name ) . '_PAYMENT_PENDING' ) );
+        }
 
         // Get the correct cart / session
         $cart = VirtueMartCart::getCart();
@@ -650,18 +682,19 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
         if (! $payment_element) {
             return null;
         }
-
-        $query = 'SELECT #__virtuemart_payment_plg_' . $payment_element . '.`virtuemart_order_id` FROM ' . '#__virtuemart_payment_plg_' . $payment_element . " WHERE  `order_number`= '" . $order_number . "'";
-
-        $db->setQuery($query);
-        $virtuemart_order_id = $db->loadResult();
-
-        if (! $virtuemart_order_id) {
-            return null;
+        if ($this->_name == $payment_element){
+            $query = 'SELECT #__virtuemart_payment_plg_' . $payment_element . '.`virtuemart_order_id` FROM ' . '#__virtuemart_payment_plg_' . $payment_element . " WHERE  `order_number`= '" . $order_number . "'";
+            $db->setQuery($query);
+            $virtuemart_order_id = $db->loadResult();
+            if (! $virtuemart_order_id) {
+                return null;
+            }
+            //  $this->handlePaymentUserCancel($virtuemart_order_id);
+            return true;
         }
 
-        $this->handlePaymentUserCancel($virtuemart_order_id);
-        return true;
+
+
     }
 
     /**
@@ -683,13 +716,15 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
      * @return boolean
      */
     public function plgVmOnCgpCallback($data) {
+
         // correct for sofortbanking if necessary
-        if ($data['billing_option'] == 'directebanking') {
-            $data['billing_option'] = 'sofortbanking';
+        if ($data['pt'] == 'directebanking') {
+            $data['pt'] = 'sofortbanking';
         }
 
         // Process only correct payment option
-        if (substr($this->_plugin_name, 3) == $data['billing_option']) {
+        $plugin_name = substr($this->_plugin_name, 3);
+        if ($plugin_name == $data['pt']) {
             foreach (glob(JPATH_VM_ADMINISTRATOR . DS . 'tables' . DS . "*.php") as $filename) {
                 require_once ($filename);
             }
@@ -697,7 +732,7 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
                 require (JPATH_VM_ADMINISTRATOR . DS . 'models' . DS . 'orders.php');
             }
 
-            $order_number = $data['extra'];
+            $order_number = trim(substr($data['reference'],11));
 
             $virtuemart_order_id = VirtueMartModelOrders::getOrderIdByOrderNumber($order_number);
             // Send email to Admins if Order was not found
@@ -713,33 +748,24 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
 
             $thisOrder = new VirtueMartModelOrders();
             $thisOrder = $thisOrder->getOrder($virtuemart_order_id);
-
-            $vendorId = 0;
-            $payment = $this->getDataByOrderId($virtuemart_order_id);
-            $method = $this->getVmPluginMethod($payment->virtuemart_paymentmethod_id);
-
+            $method = $this->getVmPluginMethod($thisOrder['details']['BT']->virtuemart_paymentmethod_id);
             if (! $this->selectedThisElement($method->payment_element)) {
                 return false;
             }
 
             if ($thisOrder['details']['BT']->order_status != $method->status_success) {
                 // Send email if HASH verification failed
-                $hashString = ($method->test_mode == 'test' ? 'TEST' : '') . $data['transaction_id'] . $data['currency'] . $data['amount'] . $data['ref'] . $data['status'] . $method->hash_key;
+                $hashString = ($method->test_mode == 'test' ? 'TEST' : '') . $data['transaction'] . $data['currency'] . $data['amount'] . $data['reference'] . $data['code'] . $method->hash_key;
 
                 if (md5($hashString) != $data['hash']) {
                     $this->_debug = true; // force debug here
                     $this->logInfo('plgVmOnCgpCallback: invalid hash ', 'ERROR');
                     // send an email to admin, and ofc not update the order status: exit is fine
-                    $this->sendEmailToVendorAndAdmins(JText::_('VMPAYMENT_' . strtoupper($this->_plugin_name) . '_ERROR_EMAIL_SUBJECT'), JText::_('VMPAYMENT_' . strtoupper($this->_plugin_name) . '_INVALID_HASH'));
+                    $this->sendEmailToVendorAndAdmins(JText::_('VMPAYMENT_' . strtoupper($this->_plugin_name) . '_ERROR_EMAIL_SUBJECT'), JText::_('VMPAYMENT_' . strtoupper($this->_plugin_name) . '_INVALID_HASH '.$hashString));
                     exit('invalid hash!');
                 }
 
                 $this->_debug = $method->debug;
-                if (! $payment) {
-                    $this->logInfo('getDataByOrderId payment not found: exit ', 'ERROR');
-                    return null;
-                }
-                $this->logInfo('plgVmOnCgpCallback: Receiving callback data: ' . var_export($data, true), 'message');
 
                 // Get all know columns of the table
                 $db = JFactory::getDBO();
@@ -763,32 +789,32 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
                 $this->storePSPluginInternalData($response_fields);
 
                 // Update Order status
-                switch ($data['status']) {
-                    case "200":
-                        $new_status = $method->status_success;
-                        $comments = JTExt::sprintf('VMPAYMENT_' . strtoupper($this->_plugin_name) . '_PAYMENT_SUCCESS', $order_number);
-                        break;
-
-                    case "300":
-                        $new_status = $method->status_canceled;
-                        $comments = JTExt::sprintf('VMPAYMENT_' . strtoupper($this->_plugin_name) . '_PAYMENT_FAILED', $order_number);
-                        break;
+                if ($data['code'] >=0 && $data['code'] <200){
+                    $new_status = $method->status_pending;
+                    $comments = JTExt::sprintf('VMPAYMENT_' . strtoupper($this->_plugin_name) . '_PAYMENT_PENDING', $order_number);
+                }
+                if ($data['code'] >=200 && $data['code'] <300){
+                    $new_status = $method->status_success;
+                    $comments   = JTExt::sprintf( 'VMPAYMENT_' . strtoupper( $this->_plugin_name ) . '_PAYMENT_SUCCESS', $order_number );
+                }
+                if ($data['code'] >=700 && $data['code'] <800){
+                    $new_status = $method->status_pending;
+                    $comments = JTExt::sprintf('VMPAYMENT_' . strtoupper($this->_plugin_name) . '_PAYMENT_PENDING', $order_number);
                 }
                 $this->logInfo('plgVmOnCgpCallback: return new_status:' . $new_status, 'message');
 
                 // Send the email only if payment has been accepted
-                if ($virtuemart_order_id) {
-                    $modelOrder = VmModel::getModel('orders');
-                    $order['order_status'] = $new_status;
-                    $order['virtuemart_order_id'] = $virtuemart_order_id;
-                    $order['customer_notified'] = 1;
-                    $order['comments'] = $comments;
-                    $modelOrder->updateStatusForOneOrder($virtuemart_order_id, $order, true);
-                }
-
-                return true;
+                // if ($virtuemart_order_id) {
+                $modelOrder = VmModel::getModel('orders');
+                $order['order_status'] = $new_status;
+                $order['virtuemart_order_id'] = $virtuemart_order_id;
+                $order['customer_notified'] = 1;
+                $order['comments'] = $comments;
+                $modelOrder->updateStatusForOneOrder($virtuemart_order_id, $order, true);
+                // }
+                return $data['transaction'].'.'.$data['code'];
             } else {
-                exit('payment already processed');
+                return('payment already processed');
             }
         } else {
             return null;
@@ -977,6 +1003,67 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
      * @author Max Milbers
      */
     public function plgVmDisplayListFEPayment(VirtueMartCart $cart, $selected = 0, &$htmlIn) {
+
+        if ($this->getPluginMethods($cart->vendorId) === 0) {
+            if (empty($this->_name)) {
+                $app = JFactory::getApplication();
+                $app->enqueueMessage(vmText::_('COM_VIRTUEMART_CART_NO_' . strtoupper($this->_psType)));
+                return false;
+            } else {
+                return false;
+            }
+        }
+
+        $method_name = $this->_psType . '_name';
+        $idN = 'virtuemart_'.$this->_psType.'method_id';
+
+        foreach ($this->methods as $this->_currentMethod) {
+            if ($this->checkConditions($cart, $this->_currentMethod, $cart->cartPrices)) {
+
+                $html = '';
+                $cartPrices=$cart->cartPrices;
+                if (isset($this->_currentMethod->cost_method)) {
+                    $cost_method=$this->_currentMethod->cost_method;
+                } else {
+                    $cost_method=true;
+                }
+                $methodSalesPrice = $this->setCartPrices($cart, $cartPrices, $this->_currentMethod, $cost_method);
+
+                $this->_currentMethod->payment_currency = $this->getPaymentCurrency($this->_currentMethod);
+                $this->_currentMethod->$method_name = $this->renderPluginName($this->_currentMethod);
+
+                if (!$this->_currentMethod->itemise_in_cart and $this->_currentMethod->paypalproduct=='exp'){
+                    continue;
+                }
+                $html .= $this->getPluginHtml($this->_currentMethod, $selected, $methodSalesPrice);
+
+                $htmlIn[$this->_psType][$this->_currentMethod->$idN] =$html;
+
+            }
+            return true;
+        }
+
+
+
+
+
+        if ($this->_plugin_name == 'Cgpideal'){
+            $html .= '<br />
+                <span class="vmpayment_cardinfo">' . '
+		            <table border="0" cellspacing="0" cellpadding="2" width="100%">
+		                <tr valign="top">
+		                    <td nowrap width="10%" align="right">
+		        	            <label for="cgp_ideal_issuer">' . JText::_('VMPAYMENT_' . strtoupper($this->_plugin_name) . '_IDEAL_SELECT_BANK_LABEL') . '</label>
+		                    </td>
+		                    <td>' .
+                     $this->getCgBankHtml($this->methods[0]->virtuemart_paymentmethod_id) .'
+		                    </td>
+		                </tr>
+		            </table>
+		        </span>';
+            $htmla[] = $html;
+            $htmlIn[] = $htmla;
+        }
         return $this->displayListFE($cart, $selected, $htmlIn);
     }
 
@@ -1057,63 +1144,6 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
         return $this->onShowOrderPrint($order_number, $method_id);
     }
 
-    /**
-     * Save updated order data to the method specific table
-     *
-     * @param array $_formData
-     *            Form data
-     * @return mixed, True on success, false on failures (the rest of the save-process will be
-     *         skipped!), or null when this method is not actived.
-     * @author Oscar van Eijk
-     *
-     *         public function plgVmOnUpdateOrderPayment( $_formData) {
-     *         return null;
-     *         }
-     */
-    /**
-     * Save updated orderline data to the method specific table
-     *
-     * @param array $_formData
-     *            Form data
-     * @return mixed, True on success, false on failures (the rest of the save-process will be
-     *         skipped!), or null when this method is not actived.
-     * @author Oscar van Eijk
-     *
-     *         public function plgVmOnUpdateOrderLine( $_formData) {
-     *         return null;
-     *         }
-     */
-    /**
-     * plgVmOnEditOrderLineBE
-     * This method is fired when editing the order line details in the backend.
-     * It can be used to add line specific package codes
-     *
-     * @param integer $_orderId
-     *            The order ID
-     * @param integer $_lineId
-     * @return mixed Null for method that aren't active, text (HTML) otherwise
-     * @author Oscar van Eijk
-     *
-     *         public function plgVmOnEditOrderLineBE( $_orderId, $_lineId) {
-     *         return null;
-     *         }
-     */
-
-    /**
-     * This method is fired when showing the order details in the frontend, for every orderline.
-     * It can be used to display line specific package codes, e.g. with a link to external tracking and
-     * tracing systems
-     *
-     * @param integer $_orderId
-     *            The order ID
-     * @param integer $_lineId
-     * @return mixed Null for method that aren't active, text (HTML) otherwise
-     * @author Oscar van Eijk
-     *
-     *         public function plgVmOnShowOrderLineFE( $_orderId, $_lineId) {
-     *         return null;
-     *         }
-     */
     function plgVmDeclarePluginParamsPaymentVM3(&$data) {
         return $this->declarePluginParams('payment', $data);
     }
@@ -1127,7 +1157,7 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
         return $this->getIdealParam($iPaymentmethodId,'issuers');
     }
 
-    private function checkBankOptions($iPaymentmethodId) {
+    protected function checkBankOptions($iPaymentmethodId) {
         $iIssuerRefresh = $this->getIdealParam($iPaymentmethodId,'issuer_refresh');
         if ($iIssuerRefresh < time()) {
             $this->cacheBankOptions($iPaymentmethodId);
@@ -1136,29 +1166,31 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
 
     protected function cacheBankOptions($iPaymentmethodId) {
 
-
-        if ($this->getIdealParam($iPaymentmethodId,'test_mode')) {
-            $sUrl = 'https://secure-staging.curopayments.net/cache/idealDirectoryCUROPayments.dat';
-        } else {
-            $sUrl = 'https://secure.curopayments.net/cache/idealDirectoryCUROPayments.dat';
-        }
-
-        if (! ini_get('allow_url_fopen') || ! function_exists('file_get_contents')) {
-            $sIssuers = false;
-        } else {
-            $sIssuers = file_get_contents($sUrl);
-        }
-
         $db = JFactory::getDBO();
         $query = 'SELECT #__virtuemart_paymentmethods .`payment_params` FROM #__virtuemart_paymentmethods' . " WHERE  `virtuemart_paymentmethod_id`= '" . $iPaymentmethodId . "'";
         $db->setQuery($query);
         $sPaymentParams = $db->loadResult();
-
         if (! $sPaymentParams) {
             return null;
         }
-
         $aPaymentParams = explode('|', $sPaymentParams);
+        $aParams = [];
+        foreach ($aPaymentParams as $param) {
+            $aParam = [];
+            $aParam = explode('=',$param);
+            $aParams[$aParam[0]] = trim($aParam[1],'"');
+        }
+        $bTestmode = ($aParams['test_mode'] == 'test' ? true : false);
+        $oCardGate = new cardgate\api\Client( (int) $aParams['merchant_id'], $aParams['api_key'], $bTestmode);
+        $oCardGate->setIp( $_SERVER['REMOTE_ADDR'] );
+        $aIssuers = $oCardGate->methods()
+                              ->get( cardgate\api\Method::IDEAL )
+                              ->getIssuers();
+        $aBanks = [];
+        foreach ($aIssuers as $code=>$bank){
+            $aBanks[$bank['id']] = $bank['name'];
+        }
+
         foreach ($aPaymentParams as $key => $value) {
             if (! (strpos($value, 'issuer_refresh="') === false)) {
                 unset($aPaymentParams[$key]);
@@ -1172,10 +1204,9 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
         $iIssuerRefresh = time() + $iCacheTime;
 
         $aPaymentParams[] = "issuer_refresh=\"" . $iIssuerRefresh . '"';
-        $aPaymentParams[] = "issuers=\"" . base64_encode($sIssuers);
+        $aPaymentParams[] = "issuers=\"" . base64_encode(serialize($aBanks));
 
-        $aIssuers = unserialize($sIssuers);
-        if ($aIssuers != false && array_key_exists("INGBNL2A", $aIssuers)){
+        if ($aBanks != false && array_key_exists("INGBNL2A", $aBanks)){
             $sPaymentParams = implode( '|', $aPaymentParams );
             $query          = 'UPDATE #__virtuemart_paymentmethods  SET `payment_params`= \'' . $sPaymentParams . '\' WHERE `virtuemart_paymentmethod_id`= ' . $iPaymentmethodId;
             $db->setQuery( $query );
@@ -1184,7 +1215,7 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
     }
 
     private function makeBankOptions($aBanks) {
-        $html = '';
+        $html = '<option value="0" >'. JText::_('VMPAYMENT_' . strtoupper($this->_plugin_name) . '_IDEAL_SELECT_BANK_DEFAULT').'</option>';
         foreach ($aBanks as $idBank => $bankName) {
             $html .= '<option value="' . $idBank . '">' . $bankName . '</option>';
         }
@@ -1221,7 +1252,6 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
             case 'issuers':
                 $output = substr($output, 9);
                 $output = unserialize(base64_decode($output));
-                $output[0] = 'Kies uw bank a.u.b.';
                 break;
             case 'test_mode':
                 $output = substr($output, 11, 4);
@@ -1230,4 +1260,119 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
         }
         return $output;
     }
+    private function getCgBankHtml($iPaymentmethodId){
+        $html = '';
+        $html .= '<select id="cgp_ideal_issuer" name="cgp_ideal_issuer"">';
+        $aBanks = $this->getBankOptions($iPaymentmethodId);
+        $html .= $this->makeBankOptions($aBanks);
+        $html .="</select>";
+        return $html;
+    }
+    static function getPaymentCurrency (&$method, $selectedUserCurrency = false) {
+
+        if (empty($method->payment_currency)) {
+            $vendor_model = VmModel::getModel('vendor');
+            $vendor = $vendor_model->getVendor($method->virtuemart_vendor_id);
+            $method->payment_currency = $vendor->vendor_currency;
+            return $method->payment_currency;
+        } else {
+
+            $vendor_model = VmModel::getModel( 'vendor' );
+            $vendor_currencies = $vendor_model->getVendorAndAcceptedCurrencies( $method->virtuemart_vendor_id );
+
+            if(!$selectedUserCurrency) {
+                if($method->payment_currency == -1) {
+                    $mainframe = JFactory::getApplication();
+                    $selectedUserCurrency = $mainframe->getUserStateFromRequest( "virtuemart_currency_id", 'virtuemart_currency_id', vRequest::getInt( 'virtuemart_currency_id', $vendor_currencies['vendor_currency'] ) );
+                } else {
+                    $selectedUserCurrency = $method->payment_currency;
+                }
+            }
+
+            $vendor_currencies['all_currencies'] = explode(',', $vendor_currencies['all_currencies']);
+            if(in_array($selectedUserCurrency,$vendor_currencies['all_currencies'])){
+                $method->payment_currency = $selectedUserCurrency;
+            } else {
+                $method->payment_currency = $vendor_currencies['vendor_currency'];
+            }
+
+            return $method->payment_currency;
+        }
+
+    }
+
+    protected function renderPluginName($activeMethod) {
+        $return = '';
+        $plugin_name = $this->_psType . '_name';
+        $plugin_desc = $this->_psType . '_desc';
+        $description = '';
+        // 		$params = new JParameter($plugin->$plugin_params);
+        // 		$logo = $params->get($this->_psType . '_logos');
+        $logosFieldName = $this->_psType . '_logos';
+        $logos = $activeMethod->$logosFieldName;
+        if (!empty($logos)) {
+            $return = $this->displayLogos($logos) . ' ';
+        }
+        $pluginName = $return . '<span class="' . $this->_type . '_name">' . $activeMethod->$plugin_name . '</span>';
+        if ($activeMethod->sandbox) {
+            $pluginName .= ' <span style="color:rgba(255,0,0,0);font-weight:bold">Sandbox (' . $activeMethod->virtuemart_paymentmethod_id . ')</span>';
+        }
+        if (!empty($activeMethod->$plugin_desc)) {
+            $pluginName .= '<span class="' . $this->_type . '_description">' . $activeMethod->$plugin_desc . '</span>';
+        }
+        return $pluginName;
+    }
+
+    protected function getPluginHtml ($plugin, $selectedPlugin, $pluginSalesPrice) {
+
+        $pluginmethod_id = $this->_idName;
+        $pluginName = $this->_psType . '_name';
+        if ($selectedPlugin == $plugin->{$pluginmethod_id}) {
+            $checked = 'checked="checked"';
+        } else {
+            $checked = '';
+        }
+
+        $currency = CurrencyDisplay::getInstance ();
+        $costDisplay = "";
+        if ($pluginSalesPrice) {
+            $costDisplay = $currency->priceDisplay( $pluginSalesPrice );
+            $t = vmText::_( 'COM_VIRTUEMART_PLUGIN_COST_DISPLAY' );
+            if(strpos($t,'/')!==FALSE){
+                list($discount, $fee) = explode( '/', vmText::_( 'COM_VIRTUEMART_PLUGIN_COST_DISPLAY' ) );
+                if($pluginSalesPrice>=0) {
+                    $costDisplay = '<span class="'.$this->_type.'_cost fee"> ('.$fee.' +'.$costDisplay.")</span>";
+                } else if($pluginSalesPrice<0) {
+                    $costDisplay = '<span class="'.$this->_type.'_cost discount"> ('.$discount.' -'.$costDisplay.")</span>";
+                }
+            } else {
+                $costDisplay = '<span class="'.$this->_type.'_cost fee"> ('.$t.' +'.$costDisplay.")</span>";
+            }
+        }
+
+        $dynUpdate='';
+        if( VmConfig::get('oncheckout_ajax',false)) {
+            $dynUpdate=' data-dynamic-update="1" ';
+        }
+
+        $html = '<input type="radio" '.$dynUpdate.' name="' . $pluginmethod_id . '" id="' . $this->_psType . '_id_' . $plugin->$pluginmethod_id . '"   value="' . $plugin->$pluginmethod_id . '" ' . $checked . ">\n"
+                . '<label for="' . $this->_psType . '_id_' . $plugin->$pluginmethod_id . '">' . '<span class="' . $this->_type . '">' . $plugin->$pluginName . $costDisplay . "</span></label>\n";
+        if ($plugin->payment_element == 'cgpideal') {
+            $html .= $this->getCgBankHtml( $plugin->virtuemart_paymentmethod_id );
+        }
+        return $html;
+    }
+
+    public function clearIssuers(&$data){
+        $params = explode ('|',$data->payment_params);
+        foreach ($params as $index => $string) {
+            if (strpos($string, 'issuer_refresh') !== FALSE)
+                $params[$index] = '"issuer_refresh=0"';
+        }
+        $paramString = implode('|', $params);
+        $data->payment_params = $paramString;
+        return $data;
+
+    }
+
 }
