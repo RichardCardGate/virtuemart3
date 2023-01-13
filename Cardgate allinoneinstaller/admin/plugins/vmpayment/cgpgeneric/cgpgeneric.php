@@ -47,7 +47,7 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
      *
      * @var mixed
      */
-    protected $_plugin_version = "4.0.0";
+    protected $_plugin_version = "4.0.1";
     protected $_url = '';
     protected $_merchant_id = '';
     protected $_api_key= '';
@@ -753,7 +753,7 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
                 return false;
             }
 
-            if ($thisOrder['details']['BT']->order_status != $method->status_success) {
+            if ($thisOrder['details']['BT']->order_status != $method->status_success &&  $thisOrder['details']['BT']->order_status !=$method->status_canceled && $thisOrder['details']['BT']->order_status != 'X') {
                 // Send email if HASH verification failed
                 $hashString = ($method->test_mode == 'test' ? 'TEST' : '') . $data['transaction'] . $data['currency'] . $data['amount'] . $data['reference'] . $data['code'] . $method->hash_key;
 
@@ -797,21 +797,22 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
                     $new_status = $method->status_success;
                     $comments   = JTExt::sprintf( 'VMPAYMENT_' . strtoupper( $this->_plugin_name ) . '_PAYMENT_SUCCESS', $order_number );
                 }
+                if ($data['code'] >=300 && $data['code'] <400){
+                    // X is the dafault canceled value
+                    $new_status = $data['code']==309 ? 'X': $method->status_canceled;
+                    $comments   = JTExt::sprintf( 'VMPAYMENT_' . strtoupper( $this->_plugin_name ) . '_PAYMENT_FAILED', $order_number );
+                }
                 if ($data['code'] >=700 && $data['code'] <800){
-                    $new_status = $method->status_pending;
+                    $new_status = 'U'; //confirmed by shopper
                     $comments = JTExt::sprintf('VMPAYMENT_' . strtoupper($this->_plugin_name) . '_PAYMENT_PENDING', $order_number);
                 }
                 $this->logInfo('plgVmOnCgpCallback: return new_status:' . $new_status, 'message');
-
-                // Send the email only if payment has been accepted
-                // if ($virtuemart_order_id) {
                 $modelOrder = VmModel::getModel('orders');
                 $order['order_status'] = $new_status;
                 $order['virtuemart_order_id'] = $virtuemart_order_id;
                 $order['customer_notified'] = 1;
                 $order['comments'] = $comments;
-                $modelOrder->updateStatusForOneOrder($virtuemart_order_id, $order, true);
-                // }
+                $modelOrder->updateStatusForOneOrder( $virtuemart_order_id, $order, true );
                 return $data['transaction'].'.'.$data['code'];
             } else {
                 return('payment already processed');
