@@ -6,7 +6,7 @@
 
 ## Support
 
-This Extension supports VirtueMart version **3.x** and **4.x** with the Joomla versions **2.5, 2.6 and 3.x**
+This Extension supports VirtueMart version **3.x** and **4.x** with the Joomla versions **2.5, 2.6, 3.x and 4.x**
 
 ## Preparation
 
