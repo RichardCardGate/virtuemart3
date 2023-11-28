@@ -16,7 +16,6 @@
     	<!-- Administration Menu Section -->
     	<!-- Administration Main File Copy Section -->
         <files folder="admin">
-            	<filename>index.html</filename>
             	<filename>admin.cgp.php</filename>
 		<folder>plugins</folder>
 		<folder>components</folder>

@@ -22,6 +22,8 @@
  * @copyright   Copyright (c) 2022 CardGate B.V. - All rights reserved.
  * @license     http://www.gnu.org/copyleft/gpl.html GNU/GPL
  */
+use Joomla\CMS\Plugin\PluginHelper;
+use Joomla\CMS\Factory;
 // No direct access
 defined( '_JEXEC' ) or die( 'Restricted access' );
 jimport( 'joomla.application.component.controller' );
@@ -35,6 +37,11 @@ vmDefines::defines(0);
  */
 class CgpController extends JControllerLegacy {
 
+    function __construct() {
+        parent::__construct();
+
+    }
+
     public function callback() {
         // Process callback
 
@@ -47,10 +54,12 @@ class CgpController extends JControllerLegacy {
             $defaultView = $this->default_view;
             $basePath = $this->basePath;
         }
-        $document = JFactory::getDocument();
+        //die('callback test');
+        $document = $this->app->getDocument();
+       // $document = Factory::getApplication()->getDocument();
         $viewType = $document->getType();
-        $viewName = JRequest::getCmd( 'view', $defaultView );
-        $viewLayout = JRequest::getCmd( 'layout', 'default' );
+        $viewName = vRequest::getCmd( 'view', $defaultView );
+        $viewLayout = vRequest::getCmd( 'layout', 'default' );
         $view = $this->getView( $viewName, $viewType, '', array( 'base_path' => $basePath ) );
         // Set the layout
         $view->setLayout( $viewLayout );
@@ -64,7 +73,7 @@ class CgpController extends JControllerLegacy {
     }
 
     protected function _process_callback() {
-
+die('this callback no longer used');
 
         defined( 'DS' ) or define( 'DS', DIRECTORY_SEPARATOR );
 
@@ -84,9 +93,20 @@ class CgpController extends JControllerLegacy {
             require( VMPATH_SITE. DS . 'models' . DS . 'orders.php' );
         }
 
-        JPluginHelper::importPlugin( 'vmpayment' );
-        $dispatcher = JEventDispatcher::getInstance();
-        $return = $dispatcher->trigger( 'plgVmOnCgpCallback', array( $_GET ) );
+       $plugin =  PluginHelper::importPlugin('vmpayment', 'Cgp'.$_GET['pt']);
+        $results = $plugin->plgVmOnCgpCallback($_GET);
+       // $results = Factory::getApplication()->triggerEvent('onMyevent');
+      $results =$this->app->triggerEvent( 'onCgpCallback', array($_GET) );
+        $a = $results;
+        $subject = $this->getDispatcher('vmpayment');
+        $config = ['type'=>'vmpayment', 'name'=> 'Cgp'.$_GET['pt']];
+        $dispatcher = $this->getDispatcher('vmpayment');
+        $return = $dispatcher->dispatch('plgVmOnCgpCallback', $subject);
+       // $dispatcher = vDispatcher::importVMPlugins('vmpayment');
+       // $return = $dispatcher::trigger('plgVmOnCgpCallback', array($_GET));
+
+        //$dispatcher = JEventDispatcher::getInstance();
+        //$return = $dispatcher->trigger( 'plgVmOnCgpCallback', array( $_GET ) );
         return $return[0];
     }
 

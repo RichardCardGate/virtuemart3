@@ -6,7 +6,7 @@
     <authorUrl>http://www.cardgate.com/</authorUrl>
     <copyright>Copyright (c) 2015 Card Gate Plus B.V. All rights reserved.</copyright>
     <license>http://www.gnu.org/licenses/gpl-3.0.html GNU/GPL</license>
-    <version>4.0.1</version>
+    <version>4.0.2</version>
     <description><![CDATA[<a href="http://www.cardgate.com/" target="_blank">Card Gate Plus</a> is providing various payment solutions for the internet market ]]></description>
     <files>
         <filename plugin="cgpgiropay">cgpgiropay.php</filename>
@@ -17,7 +17,7 @@
     </languages>
     <vmconfig>
         <fields name="params">
-            <fieldset name="basic" addfieldpath="/administrator/components/com_virtuemart/fields">  
+            <fieldset name="basic" addfieldpath="/administrator/components/com_virtuemart/fields">
                 <field type="vmtitle" default="VMPAYMENT_CGPGIROPAY_CARDGATE_SETTINGS_SECTION"/>
                 
                 <field type="list" name="test_mode" label="VMPAYMENT_CGPGIROPAY_TEST_MODE" default="live" description="VMPAYMENT_CGPGIROPAY_TEST_MODE_DESC">

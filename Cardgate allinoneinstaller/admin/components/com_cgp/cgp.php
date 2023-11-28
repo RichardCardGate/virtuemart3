@@ -28,10 +28,12 @@ defined( '_JEXEC' ) or die( 'Restricted access' );
 defined('DS') or define('DS', DIRECTORY_SEPARATOR);
 
 // Require the base controller
-require_once( JPATH_COMPONENT.DS.'controller.php' );
+
+require_once(JPATH_BASE . '/components/com_cgp/controller.php');
 
 // Require specific controller if requested
-if ($controller = JRequest::getWord('controller')) {
+/*
+if ($controller = vRequest::getWord('controller')) {
     
 	$path = JPATH_COMPONENT.DS.'controllers'.DS.$controller.'.php';
 
@@ -41,9 +43,10 @@ if ($controller = JRequest::getWord('controller')) {
 		$controller = '';
 	}
 }
+*/
 $method = JFactory::getApplication()->input->get('task');
 // Create the controller
-$classname	= 'CgpController'.$controller;
+$classname	= 'CgpController';
 
 $controller	= new $classname();
 // Perform the Request task

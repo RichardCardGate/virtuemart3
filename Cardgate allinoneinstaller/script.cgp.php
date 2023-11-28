@@ -1,6 +1,4 @@
 <?php
-defined ('_JEXEC') or die('Restricted access');
-
 /**
  * CardGate script file
  *
@@ -9,6 +7,8 @@ defined ('_JEXEC') or die('Restricted access');
  * @author Richard Schoots
  * @package CardGate
  */
+
+defined ('_JEXEC') or die('Restricted access');
 
 defined ('DS') or define('DS', DIRECTORY_SEPARATOR);
 
@@ -19,9 +19,23 @@ if((int)$max_execution_time<120) {
 $memory_limit = (int) substr(ini_get('memory_limit'),0,-1);
 if($memory_limit<128)  @ini_set( 'memory_limit', '128M' );
 
+if (!class_exists( 'VmConfig' )) {
+    $path = JPATH_ROOT .'/administrator/components/com_virtuemart/helpers/config.php';
+    if(file_exists($path)){
+        require($path);
+    } else {
+        $app = JFactory::getApplication();
+        $app->enqueueMessage('VirtueMart Core is not installed, please install VirtueMart again, or uninstall the AIO component by the joomla extension manager');
+        return false;
+    }
+}
+
+VmConfig::loadConfig();
+if(!class_exists('vmText')) require(JPATH_ROOT.DS.'administrator'.DS.'components'.DS.'com_virtuemart'.DS.'helpers'.DS.'vmtext.php');
+
 // hack to prevent defining these twice in 1.6 installation
 if (!defined ('_CGP_SCRIPT_INCLUDED')) {
-
+//    include(VMPATH_ADMIN.'/components/com_virtuemart/helpers/vrequest.php');
 	define('_CGP_SCRIPT_INCLUDED', TRUE);
 	
 	/**
@@ -51,11 +65,11 @@ if (!defined ('_CGP_SCRIPT_INCLUDED')) {
 		}
 
 		public function install () {
-			$this->cgpInstall();
+		//	$this->cgpInstall();
 		}
 
 		public function discover_install () {
-			$this->cgpInstall();
+		//	$this->cgpInstall();
 		}
 
 		public function postflight () {
@@ -105,8 +119,8 @@ if (!defined ('_CGP_SCRIPT_INCLUDED')) {
 			$this->installPlugin ('CardGatePlus Bitcoin', 'plugin', 'cgpbitcoin', 'vmpayment');
 			$this->installPlugin ('CardGatePlus Billink', 'plugin', 'cgpbillink', 'vmpayment');
 			$this->installPlugin ('CardGatePlus SprayPay', 'plugin', 'cgpspraypay', 'vmpayment');
-				
-			$task = JRequest::getCmd ('task');
+
+            $task = vRequest::getCmd ('task');
 			
 			if ($task != 'updateDatabase') {
 
@@ -135,45 +149,30 @@ if (!defined ('_CGP_SCRIPT_INCLUDED')) {
 		 *
 		 */
 		private function installPlugin ($name, $type, $element, $group) {
-
-			$task = JRequest::getCmd ('task');
+            $task = vRequest::getCmd ('task');
 
 			if ($task != 'updateDatabase') {
 				$data = array();
-				
-				if (version_compare (JVERSION, '1.7.0', 'ge')) {
-					
-					// Joomla! 1.7 code here
-					$table = JTable::getInstance ('extension');
-					$data['enabled'] = 1;
-					$data['access'] = 1;
-					$tableName = '#__extensions';
-					$idfield = 'extension_id';
-				} elseif (version_compare (JVERSION, '1.6.0', 'ge')) {
 
-					// Joomla! 1.6 code here
-					$table = JTable::getInstance ('extension');
-					$data['enabled'] = 1;
-					$data['access'] = 1;
-					$tableName = '#__extensions';
-					$idfield = 'extension_id';
-				} else {
+                $table = JTable::getInstance ('extension');
+                $data['enabled'] = 1;
+                $data['access'] = 1;
+                $tableName = '#__extensions';
+                $idfield = 'extension_id';
 
-					// Joomla! 1.5 code here
-					$table = JTable::getInstance ('plugin');
-					$data['published'] = 1;
-					$data['access'] = 0;
-					$tableName = '#__plugins';
-					$idfield = 'id';
-				}
+                $data['params'] = '';
+                $data['custom_data'] = '';
+                $data['manifest_cache'] = '';
 
 				$data['name'] = $name;
 				$data['type'] = $type;
 				$data['element'] = $element;
 				$data['folder'] = $group;
 				$data['client_id'] = 0;
+                $data['package_id'] = 0;
+                $data['locked'] = 0;
 
-				$src = $this->path . DS . 'plugins' . DS . $group . DS . $element;
+                $src = $this->path . DS . 'plugins' . DS . $group . DS . $element;
 
 				$db = JFactory::getDBO ();
 				$q = 'SELECT COUNT(*) FROM `' . $tableName . '` WHERE `element` = "' . $element . '" and folder = "' . $group . '" ';
@@ -183,8 +182,8 @@ if (!defined ('_CGP_SCRIPT_INCLUDED')) {
 				//We write only in the table, when it is not installed already
 				if ($count == 0) {
 					// 				$table->load($count);
-					if (version_compare (JVERSION, '1.6.0', 'ge')) {
-						$data['manifest_cache'] = json_encode (JApplicationHelper::parseXMLInstallFile ($src . DS . $element . '.xml'));
+					if (version_compare (JVERSION, '4.0.0', 'ge')) {
+                        $data['manifest_cache'] = json_encode(JInstaller::parseXMLInstallFile($src . '/' . $element . '.xml'));
 					}
 
 					if (!$table->bind ($data)) {
@@ -249,20 +248,24 @@ if (!defined ('_CGP_SCRIPT_INCLUDED')) {
 		
 			if (class_exists ('VmConfig')) {
 				$pluginfilename = $dst . DS . $element . '.php';
-				require ($pluginfilename);
-				
+                if(file_exists($pluginfilename)){
+                    if(!class_exists('plg'.ucfirst($group).ucfirst($element))){
+                        require_once ($pluginfilename);	//require_once cause is more failproof and is just for install
+                    }
+                } else {
+                    $app = JFactory::getApplication ();
+                    $app->enqueueMessage (get_class ($this) . ':: VirtueMart3 could not find file '.$pluginfilename);
+                    return false;
+                }
 
-				//plgVmpaymentPaypal
-				$pluginClassname = 'plg' . ucfirst ($group) . ucfirst ($element);
-				
-				//Let's get the global dispatcher
-				$dispatcher = JDispatcher::getInstance ();
-				$config = array('type'=> $group, 'name'=> $group, 'params'=> '');
-				$plugin = new $pluginClassname($dispatcher, $config);
-				;
-				//$updateString = $plugin->getVmPluginCreateTableSQL();
-				
-				//if(function_exists($plugin->getTableSQLFields)){
+                try {
+                    $plugin = vDispatcher::createPlugin($group, $element, false); //new $pluginClassname($dispatcher, $config);
+                }
+                catch (Exception $e) {
+                    //errros in sql during plugin instalalation and updates
+                    $app->enqueueMessage (get_class ($this) . ':: vDispatcher::createPlugin '.$pluginfilename.' '. $e->getMessage());
+                }
+
 				$_psType = substr ($group, 2);
 				$tablename = '#__virtuemart_' . $_psType . '_plg_' . $element;
 				$db = JFactory::getDBO ();
@@ -270,22 +273,16 @@ if (!defined ('_CGP_SCRIPT_INCLUDED')) {
 				$query = 'SHOW TABLES LIKE "' . str_replace ('#__', $prefix, $tablename) . '"';
 				$db->setQuery ($query);
 				$result = $db->loadResult ();
-				//$app -> enqueueMessage( get_class( $this ).'::  '.$query.' '.$result);
+
 				if ($result) {
 					$SQLfields = $plugin->getTableSQLFields ();
-					
 					$loggablefields = $plugin->getTableSQLLoggablefields ();
 					$tablesFields = array_merge ($SQLfields, $loggablefields);
 					$update[$tablename] = array($tablesFields, array(), array());
 					
 					vmdebug('install plugin',$update );
 					
-					$app->enqueueMessage (get_class ($this) . ':: CardGatePlus update ' . $tablename);
-
-					if (!class_exists ('GenericTableUpdater')) {
-						require(JPATH_VM_ADMINISTRATOR . DS . 'helpers' . DS . 'tableupdater.php');
-					}
-
+					$app->enqueueMessage (get_class ($this) . ':: CardGate update ' . $tablename);
 					$updater = new GenericTableUpdater();
 
 					$updater->updateMyVmTables ($update);
@@ -293,7 +290,7 @@ if (!defined ('_CGP_SCRIPT_INCLUDED')) {
 
 			} else {
 				$app = JFactory::getApplication ();
-				$app->enqueueMessage (get_class ($this) . ':: VirtueMart2 must be installed, or the tables cant be updated ' . $error);
+				$app->enqueueMessage (get_class ($this) . ':: VirtueMart must be installed, or the tables cant be updated ' . $error);
 
 			}
 
