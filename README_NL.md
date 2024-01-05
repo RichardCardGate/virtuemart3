@@ -6,7 +6,7 @@
 
 ## Support
 
-Deze extensie is geschikt voor VirtueMart versie **3.x** en **4.x** met Joomla versie **2.5, 2.6, 3.x en 4.x**
+Deze extensie is geschikt voor VirtueMart versie **3.x** en **4.x** met Joomla versie **2.5, 2.6, 3.x, 4.x en 5.x**
 
 ## Voorbereiding
 
