@@ -6,7 +6,7 @@
 
 ## Support
 
-Dieses Modul is geeignet für VirtueMart version **3.x** und **4.x** mit den Joomla Versionen **2.5, 2.6, 3.x and 4.x**
+Dieses Modul is geeignet für VirtueMart version **3.x** und **4.x** mit den Joomla Versionen **2.5, 2.6, 3.x, 4.x und 5.x**
 
 ## Vorbereitung
 
