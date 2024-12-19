@@ -47,7 +47,7 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
      *
      * @var mixed
      */
-    protected $_plugin_version = "4.0.3";
+    protected $_plugin_version = "4.0.4";
     protected $_url = '';
     protected $_merchant_id = '';
     protected $_api_key= '';
@@ -147,10 +147,11 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
                 'int'
             )
         );
-        if ($this->_name == 'cgpideal'){
+        if ( $this->_name == 'cgpideal' ) {
+            $varsToPush['issuers_show'] = array(0,'int');
             $varsToPush['issuer_refresh'] = array(0,'int');
         }
-        $this->setConfigParameterable($this->_configTableFieldName, $varsToPush);
+        $this->setConfigParameterable( $this->_configTableFieldName, $varsToPush );
     }
 
     /**
@@ -436,7 +437,7 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
         // Configure payment option.
         $oTransaction->setPaymentMethod( $method_name);
 
-        if ( $method_name == 'ideal' ) {
+        if ( $method_name == 'ideal' && $method->issuers_show == '1') {
             $oTransaction->setIssuer( $_POST['cgp_ideal_issuer']);
         }
 
@@ -1129,7 +1130,7 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
             return true;
         }
 
-        if ($this->_plugin_name == 'Cgpideal'){
+        if ( $this->_plugin_name == 'Cgpideal' && $this->methods[0]->issuers_show == '1' ) {
             $html .= '<br />
                 <span class="vmpayment_cardinfo">' . '
 		            <table border="0" cellspacing="0" cellpadding="2" width="100%">
@@ -1357,6 +1358,7 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
         }
         return $output;
     }
+
     private function getCgBankHtml($iPaymentmethodId){
         $html = '';
         $html .= '<select id="cgp_ideal_issuer" name="cgp_ideal_issuer"">';
@@ -1365,6 +1367,7 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
         $html .="</select>";
         return $html;
     }
+
     static function getPaymentCurrency (&$method, $selectedUserCurrency = false) {
 
         if (empty($method->payment_currency)) {
@@ -1454,7 +1457,8 @@ class plgVMPaymentCgpgeneric extends vmPSPlugin {
 
         $html = '<input type="radio" '.$dynUpdate.' name="' . $pluginmethod_id . '" id="' . $this->_psType . '_id_' . $plugin->$pluginmethod_id . '"   value="' . $plugin->$pluginmethod_id . '" ' . $checked . ">\n"
                 . '<label for="' . $this->_psType . '_id_' . $plugin->$pluginmethod_id . '">' . '<span class="' . $this->_type . '">' . $plugin->$pluginName . $costDisplay . "</span></label>\n";
-        if ($plugin->payment_element == 'cgpideal') {
+
+        if ( $plugin->payment_element == 'cgpideal' && $plugin->issuers_show == '1' ) {
             $html .= $this->getCgBankHtml( $plugin->virtuemart_paymentmethod_id );
         }
         return $html;
