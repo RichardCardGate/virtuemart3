@@ -1,12 +1,12 @@
 ![CardGate](https://cdn.curopayments.net/thumb/200/logos/cardgate.png)
 
-# CardGate module voor VirtueMart 3.x - 4.x
+# CardGate module voor VirtueMart 4.x
 
 [![Build Status](https://travis-ci.org/cardgate/virtuemart3.svg?branch=master)](https://travis-ci.org/cardgate/virtuemart3)
 
 ## Support
 
-Deze extensie is geschikt voor VirtueMart versie **3.x** en **4.x** met Joomla versie **2.5, 2.6, 3.x, 4.x en 5.x**
+Deze extensie is geschikt voor VirtueMart versie **4.x** met Joomla versie **5.x**
 
 ## Voorbereiding
 
